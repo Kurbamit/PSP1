@@ -14,7 +14,6 @@
 - Restaurant (susikuria kartu ir address eilutė)
 - Payment
 
----
 
 ## Other endpoints
 ### Order
