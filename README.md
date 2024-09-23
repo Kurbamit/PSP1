@@ -24,6 +24,8 @@
 ### Reservation
 - CancelReservation
 
+---
+### TODO:
 
 - Dominykas: Employee, GiftCard, Restaurant
 - Rytis: Discount, Reservation, Payment
