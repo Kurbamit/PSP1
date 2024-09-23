@@ -229,7 +229,7 @@ paths:
       tags:
         - employee
       summary: Create a new employee
-      description: Creates a new employee.
+      description: Creates a new employee and puts old data into EmployeeAudit table with DB triggers.
       requestBody:
         required: true
         content:
@@ -243,22 +243,249 @@ paths:
                 surname:
                   type: string
                   description: Last name of the employee
-                email:
-                  type: string
-                  format: email
-                  description: Email address of the employee
+                userTypeEnum:
+                  type: integer
+                  description: User type enum from UserTypeEnum
                 business_id:
                   type: string
                   description: ID of the business the employee belongs to
               required:
                 - name
                 - surname
-                - email
+                - userTypeEnum
                 - business_id
       responses:
         "201":
-          description: Employee created successfully.
+          description: Employee created successfully
         "400":
           description: Invalid employee data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - employee
+      summary: Update existing employee
+      description: Updates existing employee and puts old data into EmployeeAudit table with DB triggers.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: First name of the employee
+                surname:
+                  type: string
+                  description: Last name of the employee
+                userTypeEnum:
+                  type: integer
+                  description: User type enum from UserTypeEnum
+                business_id:
+                  type: string
+                  description: ID of the business the employee belongs to
+              required:
+                - name
+                - surname
+                - userTypeEnum
+                - business_id
+      responses:
+        "200":
+          description: Employee edited successfully
+        "400":
+          description: Invalid employee data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Original employee not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+
+    get:
+      tags:
+        - employee
+      summary: Retrieve a list of employees
+      description: Fetches a list of employees.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum length of returned list
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Ordering column name
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: name
+          in: query
+          description: Filter employees by their first name
+          required: false
+          schema:
+            type: string
+        - name: surname
+          in: query
+          description: Filter employees by their last name
+          required: false
+          schema:
+            type: string
+        - name: userTypeEnum
+          in: query
+          description: Filter employees by their user type enum
+          required: false
+          schema:
+            type: integer
+        - name: businessId
+          in: query
+          description: Filter employees by business ID
+          required: false
+          schema:
+            type: string
+        - name: userType
+          in: query
+          description: User type enum value
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of employees retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: Unique ID of the employee
+                    name:
+                      type: string
+                      description: First name of the employee
+                    surname:
+                      type: string
+                      description: Last name of the employee
+                    userTypeEnum:
+                      type: integer
+                      description: User type enum from UserTypeEnum
+                    business_id:
+                      type: string
+                      description: ID of the business the employee belongs to
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /employees/{employeeId}:
+    get:
+      tags:
+        - employee
+      summary: Retrieve a single employee by ID
+      description: Fetches an employee's details based on the provided employee ID.
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          description: Unique identifier of the employee
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Employee details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Unique ID of the employee
+                  name:
+                    type: string
+                    description: First name of the employee
+                  surname:
+                    type: string
+                    description: Last name of the employee
+                  userTypeEnum:
+                    type: integer
+                    description: User type enum from UserTypeEnum
+                  business_id:
+                    type: string
+                    description: ID of the business the employee belongs to
+        "400":
+          description: Invalid request
+        "404":
+          description: Employee not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - employee
+      summary: Delete employee from working DB table
+      description: Deletes employee data from working table and puts old data into EmployeeAudit table with DB triggers.
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          description: Unique identifier of the employee
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Employee removed successfully
+        "400":
+          description: Invalid request
+        "404":
+          description: Employee not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
         "500":
           description: Internal server error
