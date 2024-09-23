@@ -25,8 +25,8 @@
 - CancelReservation
 
 
-Dominykas: Employee, GiftCard, Restaurant
-Rytis: Discount, Reservation, Payment
-Brigita: Order, ProductVariation, CloseOrder, CancelOrder, RefundOrder
-Dovydas: Product, User, CancelReservation
-Gabrielis: Business, Inventory
+- Dominykas: Employee, GiftCard, Restaurant
+- Rytis: Discount, Reservation, Payment
+- Brigita: Order, ProductVariation, CloseOrder, CancelOrder, RefundOrder
+- Dovydas: Product, User, CancelReservation
+- Gabrielis: Business, Inventory
