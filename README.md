@@ -1,3 +1,6 @@
+Return HTTP status codes:
+[24-27 skaidrės](https://emokymai.vu.lt/mod/folder/view.php?id=61407)
+
 # API contracts
 ## CRUD operations needed for:
 #### Du endpoint'ai Read. Vienas grąžina list'ą, kitas grąžina vieną item'ą
