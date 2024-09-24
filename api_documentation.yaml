@@ -13,7 +13,7 @@ tags:
   - name: employee
     description: Operations related to Employee management
   - name: giftCard
-    description: Operations realted to GiftCard management
+    description: Operations related to GiftCard management
   - name: auth
     description: Authentication and Authorization
 
