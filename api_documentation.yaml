@@ -12,6 +12,8 @@ tags:
     description: Operations related to Payments
   - name: employee
     description: Operations related to Employee management
+  - name: giftCard
+    description: Operations realted to GiftCard management
   - name: auth
     description: Authentication and Authorization
 
@@ -229,7 +231,7 @@ paths:
       tags:
         - employee
       summary: Create a new employee
-      description: Creates a new employee and puts old data into EmployeeAudit table with DB triggers.
+      description: Creates a new employee and puts data into EmployeeAudit table with DB triggers. **Access restricted to users with admin or manager roles**.
       requestBody:
         required: true
         content:
@@ -248,6 +250,7 @@ paths:
                   description: User type enum from UserTypeEnum
                 business_id:
                   type: string
+                  format: uuid
                   description: ID of the business the employee belongs to
               required:
                 - name
@@ -262,54 +265,7 @@ paths:
         "401":
           description: Unauthenticated user
         "403":
-          description: No permission
-        "405":
-          description: Method not supported
-        "422":
-          description: Invalid data
-        "500":
-          description: Internal server error
-
-    put:
-      tags:
-        - employee
-      summary: Update existing employee
-      description: Updates existing employee and puts old data into EmployeeAudit table with DB triggers.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  description: First name of the employee
-                surname:
-                  type: string
-                  description: Last name of the employee
-                userTypeEnum:
-                  type: integer
-                  description: User type enum from UserTypeEnum
-                business_id:
-                  type: string
-                  description: ID of the business the employee belongs to
-              required:
-                - name
-                - surname
-                - userTypeEnum
-                - business_id
-      responses:
-        "200":
-          description: Employee edited successfully
-        "400":
-          description: Invalid employee data
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
-        "404":
-          description: Original employee not found
+          description: No permission (Only admin and Manager)
         "405":
           description: Method not supported
         "422":
@@ -321,7 +277,7 @@ paths:
       tags:
         - employee
       summary: Retrieve a list of employees
-      description: Fetches a list of employees.
+      description: Fetches a list of employees. **Access restricted to users with admin or manager roles**.
       parameters:
         - name: resultCount
           in: query
@@ -371,6 +327,7 @@ paths:
           required: false
           schema:
             type: string
+            format: uuid
         - name: userType
           in: query
           description: User type enum value
@@ -401,13 +358,14 @@ paths:
                       description: User type enum from UserTypeEnum
                     business_id:
                       type: string
+                      format: uuid
                       description: ID of the business the employee belongs to
         "400":
           description: Invalid request
         "401":
           description: Unauthenticated user
         "403":
-          description: No permission
+          description: No permission (Only admin and Manager)
         "405":
           description: Method not supported
         "500":
@@ -418,7 +376,7 @@ paths:
       tags:
         - employee
       summary: Retrieve a single employee by ID
-      description: Fetches an employee's details based on the provided employee ID.
+      description: Fetches an employee's details based on the provided employee ID. **Access restricted to users with admin or manager roles**.
       parameters:
         - name: employeeId
           in: path
@@ -426,6 +384,7 @@ paths:
           description: Unique identifier of the employee
           schema:
             type: string
+            format: uuid
       responses:
         "200":
           description: Employee details retrieved successfully
@@ -446,8 +405,20 @@ paths:
                   userTypeEnum:
                     type: integer
                     description: User type enum from UserTypeEnum
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: Created at date and time
+                  userName:
+                    type: string
+                    description: Employee's user name
+                  userId:
+                    type: string
+                    format: uuid
+                    description: Employee's user Id for navigation
                   business_id:
                     type: string
+                    format: uuid
                     description: ID of the business the employee belongs to
         "400":
           description: Invalid request
@@ -456,9 +427,69 @@ paths:
         "401":
           description: Unauthenticated user
         "403":
-          description: No permission
+          description: No permission (Only admin and Manager)
         "405":
           description: Method not supported
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - employee
+      summary: Update existing employee
+      description: Updates existing employee and puts old data into EmployeeAudit table with DB triggers. **Access restricted to users with admin or manager roles**. **Only admin users** can add the `business_id`.
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          description: Unique identifier of the employee
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: First name of the employee
+                surname:
+                  type: string
+                  description: Last name of the employee
+                userTypeEnum:
+                  type: integer
+                  description: User type enum from UserTypeEnum
+                business_id:
+                  type: string
+                  format: uuid
+                  description: ID of the business the employee belongs to
+              anyOf: # At least one field from the list must be present
+                - required:
+                    - name
+                - required:
+                    - surname
+                - required:
+                    - userTypeEnum
+                - required:
+                    - business_id
+      responses:
+        "200":
+          description: Employee edited successfully
+        "400":
+          description: Invalid employee data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only admin and Manager)
+        "404":
+          description: Original employee not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
         "500":
           description: Internal server error
 
@@ -466,7 +497,7 @@ paths:
       tags:
         - employee
       summary: Delete employee from working DB table
-      description: Deletes employee data from working table and puts old data into EmployeeAudit table with DB triggers.
+      description: Deletes employee data from working table and puts old data into EmployeeAudit table with DB triggers. **Access restricted to users with admin or manager roles**.
       parameters:
         - name: employeeId
           in: path
@@ -484,7 +515,304 @@ paths:
         "401":
           description: Unauthenticated user
         "403":
+          description: No permission (Only admin and Manager)
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /giftCard:
+    post:
+      tags:
+        - giftCard
+      summary: Create a new gift card
+      description: Creates a new gift card and puts data into GiftCardAudit table with DB triggers.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                price:
+                  type: number
+                  format: double
+                  description: Price of the gift card
+                validTo:
+                  type: string
+                  format: date
+                  description: Gift card valid to date
+                business_id:
+                  type: string
+                  format: uuid
+                  description: ID of the business the employee belongs to
+              required:
+                - number
+                - business_id
+      responses:
+        "201":
+          description: Gift card created successfully
+        "400":
+          description: Invalid gift card data
+        "401":
+          description: Unauthenticated user
+        "403":
           description: No permission
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+
+    get:
+      tags:
+        - giftCard
+      summary: Retrieve a list of gift cards
+      description: Fetches a list of gift cards.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum length of returned list
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Ordering column name
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: name
+          in: query
+          description: Filter gift cards by their price
+          required: false
+          schema:
+            type: number
+            format: double
+        - name: code
+          in: query
+          description: Filter gift cards by their code
+          required: false
+          schema:
+            type: string
+        - name: validTo
+          in: query
+          description: Filter gift cards by their valid to date
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: businessId
+          in: query
+          description: Filter gift cards by business ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: A list of gift cards retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                      description: Unique ID of the gift card
+                    price:
+                      type: number
+                      format: double
+                      description: Price of the gift card
+                    code:
+                      type: string
+                      description: Code of the gift card
+                    validTo:
+                      type: string
+                      format: date
+                      description: Valid to date
+                    business_id:
+                      type: string
+                      format: uuid
+                      description: ID of the business the gift card belongs to
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /giftCard/{giftCardId}:
+    get:
+      tags:
+        - giftCard
+      summary: Retrieve a single giftCard by ID
+      description: Fetches an gift card's details based on the provided gift card ID.
+      parameters:
+        - name: giftCardId
+          in: path
+          required: true
+          description: Unique identifier of the gift card
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Gift card details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: Unique ID of the gift card
+                  price:
+                    type: number
+                    format: double
+                    description: Price of the gift card
+                  code:
+                    type: string
+                    description: Code of the gift card
+                  validTo:
+                    type: string
+                    format: date
+                    description: Valid to date
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: Created at date and time
+                  createdByName:
+                    type: string
+                    description: Employee's name who created gift card
+                  createdById:
+                    type: string
+                    format: uuid
+                    description: Employee's id who created gift card
+                  business_id:
+                    type: string
+                    format: uuid
+                    description: ID of the business the gift card belongs to
+        "400":
+          description: Invalid request
+        "404":
+          description: Gift card not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - giftCard
+      summary: Update existing employee
+      description: Updates existing gift card and puts old data into GiftCardAudit table with DB triggers. **Only admin users** can add the `business_id`.
+      parameters:
+        - name: giftCardId
+          in: path
+          required: true
+          description: Unique identifier of the gift card
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                price:
+                  type: number
+                  format: double
+                  description: Price of the gift card
+                code:
+                  type: string
+                  description: Code of the gift card
+                validTo:
+                  type: string
+                  format: date
+                  description: Valid to date
+                business_id:
+                  type: string
+                  format: uuid
+                  description: ID of the business the gift card belongs to
+              anyOf: # Requires at least one field from the following
+                - required:
+                    - name
+                - required:
+                    - surname
+                - required:
+                    - userTypeEnum
+                - required:
+                    - business_id
+      responses:
+        "200":
+          description: Gift card edited successfully
+        "400":
+          description: Invalid employee data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Original employee not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - giftCard
+      summary: Delete gift card from working DB table
+      description: Deletes gift card data from working table and puts old data into GiftCardAudit table with DB triggers. **Access restricted to users with Manager or Admin role**.
+      parameters:
+        - name: giftCardId
+          in: path
+          required: true
+          description: Unique identifier of the gift card
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Gift card removed successfully
+        "400":
+          description: Invalid request
+        "404":
+          description: Gift card not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only Admin and Manager)
         "405":
           description: Method not supported
         "500":
