@@ -13,7 +13,9 @@ tags:
   - name: employee
     description: Operations related to Employee management
   - name: giftCard
-    description: Operations realted to GiftCard management
+    description: Operations related to GiftCard management
+  - name: restaurant
+    description: Operations related to Restaurant management
   - name: auth
     description: Authentication and Authorization
 
@@ -751,7 +753,7 @@ paths:
     put:
       tags:
         - giftCard
-      summary: Update existing employee
+      summary: Update existing gift card
       description: Updates existing gift card and puts old data into GiftCardAudit table with DB triggers. **Only admin users** can add the `business_id`.
       parameters:
         - name: giftCardId
@@ -785,24 +787,24 @@ paths:
                   description: ID of the business the gift card belongs to
               anyOf: # Requires at least one field from the following
                 - required:
-                    - name
+                    - price
                 - required:
-                    - surname
+                    - code
                 - required:
-                    - userTypeEnum
+                    - validTo
                 - required:
                     - business_id
       responses:
         "200":
           description: Gift card edited successfully
         "400":
-          description: Invalid employee data
+          description: Invalid gift card data
         "401":
           description: Unauthenticated user
         "403":
           description: No permission
         "404":
-          description: Original employee not found
+          description: Original gift card not found
         "405":
           description: Method not supported
         "422":
@@ -834,6 +836,369 @@ paths:
           description: Unauthenticated user
         "403":
           description: No permission (Only Admin and Manager)
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /restaurant:
+    post:
+      tags:
+        - restaurant
+      summary: Create new restaurant
+      description: Creates a new restaurant entity and puts data into RestaurantAudit table with DB triggers. **Access restricted to users with admin or manager roles**.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Restaurant name
+                country:
+                  type: string
+                  description: Country name
+                city:
+                  type: string
+                  description: City name
+                street:
+                  type: string
+                  description: Street name
+                number:
+                  type: string
+                  description: House number
+                postCode:
+                  type: string
+                  description: Post code
+                business_id:
+                  type: string
+                  format: uuid
+                  description: ID of the business the employee belongs to
+              required:
+                - name
+                - country
+                - city
+                - street
+                - number
+                - postCode
+                - business_id
+      responses:
+        "201":
+          description: Restaurant card created successfully
+        "400":
+          description: Invalid restaurant data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only admin or manager)
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+
+    get:
+      tags:
+        - restaurant
+      summary: Retrieve a list of business's restaurants
+      description: Fetches a list of restaurants. **Only admin users** can add the `business_id`.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum length of returned list
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Ordering column name
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: name
+          in: query
+          description: Filter restaurant by their name
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: Filter restaurants by their code
+          required: false
+          schema:
+            type: integer
+        - name: country
+          in: query
+          description: Filter restaurants by their country
+          required: false
+          schema:
+            type: string
+        - name: city
+          in: query
+          description: Filter restaurants by city
+          required: false
+          schema:
+            type: string
+        - name: street
+          in: query
+          description: Filter restaurants by street
+          required: false
+          schema:
+            type: string
+        - name: number
+          in: query
+          description: Filter restaurants by number
+          required: false
+          schema:
+            type: string
+        - name: postCode
+          in: query
+          description: Filter restaurants by postCode
+          required: false
+          schema:
+            type: string
+        - name: businessId
+          in: query
+          description: Filter restaurants by business **(only admin)**
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: A list of restaurants retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                      description: Unique ID of the restaurant
+                    name:
+                      type: string
+                      description: Name of the restaurant
+                    code:
+                      type: string
+                      description: Code of the restaurant
+                    fullAddress:
+                      type: string
+                      description: Full address of the restaurant
+                    business_id:
+                      type: string
+                      format: uuid
+                      description: ID of the business the restaurant belongs to
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /restaurant/{restaurantId}:
+    get:
+      tags:
+        - restaurant
+      summary: Retrieve a single restaurant by ID
+      description: Fetches an restaurant's details based on the provided restaurant ID.
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          description: Unique identifier of the restaurant
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Restaurant details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: Unique ID of the restaurant
+                  code:
+                    type: string
+                    description: Code of the restaurant
+                  name:
+                    type: string
+                    description: Name of the restaurant
+                  country:
+                    type: string
+                    description: Country of the restaurant
+                  city:
+                    type: string
+                    description: City of the restaurant
+                  street:
+                    type: string
+                    description: Street of the restaurant
+                  number:
+                    type: string
+                    description: Number of the restaurant
+                  postCode:
+                    type: string
+                    description: Post code of the restaurant
+                  addressId:
+                    type: string
+                    format: uuid
+                    description: Address table's id
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: Created at date and time
+                  createdByName:
+                    type: string
+                    description: Employee's name who created restaurant
+                  createdById:
+                    type: string
+                    format: uuid
+                    description: Employee's id who created restaurant
+                  business_id:
+                    type: string
+                    format: uuid
+                    description: ID of the business the restaurant belongs to
+        "400":
+          description: Invalid request
+        "404":
+          description: Restaurant not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - restaurant
+      summary: Update existing restaurant
+      description: Updates existing restaurant and puts old data into RestaurantAudit table with DB triggers. **Only admin users** can add the `business_id`.
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          description: Unique identifier of the restaurant
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: New name of the restaurant
+                country:
+                  type: string
+                  description: Country of the restaurant
+                city:
+                  type: string
+                  description: City of the restaurant
+                street:
+                  type: string
+                  description: Street of the restaurant
+                number:
+                  type: string
+                  description: Number of the restaurant
+                postCode:
+                  type: string
+                  description: Post code of the restaurant
+                addressId:
+                  type: string
+                  format: uuid
+                  description: ID of the address' table
+                business_id:
+                  type: string
+                  format: uuid
+                  description: ID of the business the restaurant belongs to
+              anyOf: # Requires at least one field from the following
+                - required:
+                    - name
+                - required:
+                    - country
+                - required:
+                    - city
+                - required:
+                    - street
+                - required:
+                    - number
+                - required:
+                    - postCode
+                - required:
+                    - business_id
+      responses:
+        "200":
+          description: Restaurant edited successfully
+        "400":
+          description: Invalid restaurant data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Original restaurant not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - restaurant
+      summary: Delete restaurant from working DB table
+      description: Deletes gift card data from working table and puts old data into RestaurantAudit table with DB triggers. **Access restricted to users with Admin role**.
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          description: Unique identifier of the restaurant
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Restaurant removed successfully
+        "400":
+          description: Invalid request
+        "404":
+          description: Restaurant not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only Admin)
         "405":
           description: Method not supported
         "500":
