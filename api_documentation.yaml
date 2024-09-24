@@ -13,7 +13,7 @@ tags:
   - name: employee
     description: Operations related to Employee management
   - name: giftCard
-    description: Operations related to GiftCard management
+    description: Operations realted to GiftCard management
   - name: auth
     description: Authentication and Authorization
 
@@ -276,7 +276,7 @@ paths:
     get:
       tags:
         - employee
-      summary: Retrieve a list of employees
+      summary: Retrieve a list of employees that currently working
       description: Fetches a list of employees. **Access restricted to users with admin or manager roles**.
       parameters:
         - name: resultCount
@@ -334,6 +334,27 @@ paths:
           required: false
           schema:
             type: integer
+        - name: workingFromFrom
+          in: query
+          description: Filter out by date (working from (from date))
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: workingFromTo
+          in: query
+          description: Filter out by date (working from (to date))
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: email
+          in: query
+          description: Filter out by email
+          required: false
+          schema:
+            type: string
+            format: email
       responses:
         "200":
           description: A list of employees retrieved successfully
