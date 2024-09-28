@@ -1406,7 +1406,7 @@ paths:
           schema:
             type: string
             format: uuid
-      response:
+      responses:
         "200":
           description: Product details retrieved successfully
           content:
