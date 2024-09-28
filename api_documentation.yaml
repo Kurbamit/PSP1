@@ -24,6 +24,8 @@ tags:
     description: Authentication and Authorization
   - name: product
     description: Operations related to Product management
+  - name: user
+    description: Operations related to User management
 
 paths:
   /auth/token:
@@ -980,7 +982,7 @@ paths:
           description: Reservation not found
         "500":
           description: Internal server error
-          
+
   /employees:
     post:
       tags:
@@ -2287,6 +2289,264 @@ paths:
           description: Invalid request
         "404":
           description: Product not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only Admin)
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  /user:
+    post:
+      tags:
+        - user
+      summary: Create new user
+      description: Creates a new user entity and puts data into UserAudit table with DB triggers. **Access restricted to users with Admin role**.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Username
+                passwordHash:
+                  type: string
+                  description: Hashed user password
+                email:
+                  type: string
+                  description: User email address
+              required:
+                - username
+                - passwordHash
+                - email
+      responses:
+        "201":
+          description: User created successfully
+        "400":
+          description: Invalid user data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only admin or manager)
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+    get:
+      tags:
+        - user
+      summary: Retrieve a list of users
+      description: Fetches a list of users. **Access restricted to users with Admin role**.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum length of returned list
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Ordering column name
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: username
+          in: query
+          description: Filter users by username
+          required: false
+          schema:
+            type: string
+        - name: passwordHash
+          in: query
+          description: Filter users by password hash
+          required: false
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: Filter users by their email
+          required: false
+          schema:
+            type: string
+        - name: createdAt
+          in: query
+          description: Filter users by date they were created
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: A list of users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                      description: Username
+                    passwordHash:
+                      type: string
+                      description: Hashed user password
+                    email:
+                      type: string
+                      description: User email address
+                    createdAt:
+                      type: string
+                      format: date-time
+                      description: Date when user was created
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /user/{userId}:
+    get:
+      tags:
+        - user
+      summary: Retrieve a single user by ID
+      description: Fetches a user's details based on the provided user ID.  **Access restricted to users with Admin role**.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: Unique identifier of the user
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    description: Username
+                  passwordHash:
+                    type: string
+                    description: Hashed user password
+                  email:
+                    type: string
+                    description: User's email address
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: Date when user was created
+        "400":
+          description: Invalid request
+        "404":
+          description: User not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+    put:
+      tags:
+        - user
+      summary: Update existing user
+      description: Updates existing user and puts old data into UserAudit table with DB triggers.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: Unique identifier of the user
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Username
+                passwordHash:
+                  type: string
+                  description: Hashed user password
+                email:
+                  type: string
+                  description: User email address
+              anyOf:
+                - required:
+                  - username
+                - required:
+                  - passwordHash
+                - required:
+                  - email
+      responses:
+        "200":
+          description: User edited successfully
+        "400":
+          description: Invalid user data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Original user not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+    delete:
+      tags:
+        - user
+      summary: Delete user from working DB table
+      description: Deletes user data from working table and puts old data into UserAudit table with DB triggers. **Access restricted to users with Admin role**.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: Unique identifier of the user
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: User removed successfully
+        "400":
+          description: Invalid request
+        "404":
+          description: User not found
         "401":
           description: Unauthenticated user
         "403":
