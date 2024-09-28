@@ -8,14 +8,18 @@ servers:
 tags:
   - name: order
     description: Operations related to Orders
-  - name: payment
-    description: Operations related to Payments
   - name: employee
     description: Operations related to Employee management
+  - name: payment
+    description: Operations related to Payments
+  - name: discount
+    description: Operations related to Discounts  
   - name: giftCard
     description: Operations related to GiftCard management
   - name: restaurant
     description: Operations related to Restaurant management
+  - name: reservation
+    description: Operations related to Reservation management
   - name: auth
     description: Authentication and Authorization
   - name: product
@@ -191,7 +195,7 @@ paths:
             schema:
               type: object
               properties:
-                order_id:
+                orderId:
                   type: string
                   description: ID of the order being paid
                 payments:
@@ -200,19 +204,16 @@ paths:
                   items:
                     type: object
                     properties:
-                      method:
-                        type: string
+                      paymentType:
+                        type: integer
                         enum: [Cash, Card, GiftCard]
                         description: Payment method
-                      amount:
-                        type: number
-                        format: double
-                        description: Amount paid
-                      gift_card_code:
+                      paidAt:
                         type: string
-                        description: Gift card code, required if the method is GiftCard
+                        format: date-time
+                        description: Amount paid
               required:
-                - order_id
+                - orderId
                 - payments
       responses:
         "200":
@@ -222,11 +223,733 @@ paths:
               schema:
                 type: object
                 properties:
-                  receipt_url:
+                  paymentId:
                     type: string
-                    description: URL to the final receipt
         "400":
           description: Invalid payment details or order status not open
+        "500":
+          description: Internal server error
+
+    get:
+      tags:
+        - payment
+      summary: Retrieve a list of payments
+      description: Fetches a list of payments. **Access restricted to users with admin or manager roles**.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum length of returned list
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Ordering column name
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: paymentType
+          in: query
+          description: Filter payments based on their type
+          required: false
+          schema:
+            type: integer
+        - name: startPaidAt
+          in: query
+          description: Filter payments made on or after this starting date and time
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: endPaidAt
+          in: query
+          description: Filter payments made on or before this ending date and time
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: A list of payments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: Unique ID of the payment
+                    paymentTypeEnum:
+                      type: integer
+                      description: Enum value from PaymentType
+                    paidAt:
+                      type: string
+                      format: date
+                      description: Date and time the payment was made on
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only admin and Manager)
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /payments/{paymentId}:
+    get:
+      tags:
+        - payment
+      summary: Retrieve a single payment by ID
+      description: Fetches a payment's details based on the provided payment ID. **Access restricted to users with admin or manager roles**.
+      parameters:
+        - name: paymentId
+          in: path   # <--- This was missing
+          required: true
+          description: Unique identifier of the payment
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Payment details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Unique ID of the payment
+                  paymentTypeEnum:
+                    type: integer
+                    description: Enum value from PaymentType
+                  paidAt:
+                    type: string
+                    format: date
+                    description: Date and time the payment was made on
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only admin and Manager)
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - payment
+      summary: Refund a payment
+      description: Processes a refund for a specified payment by removing the payment record and puts old data into PaymentAudit table with DB triggers. **Only admin users** are allowed to refund payments.
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          description: Unique identifier of the payment
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Payment refunded successfully
+        "400":
+          description: Invalid paymentId
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Original payment not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+
+  /discount:
+    post:
+      tags:
+        - discount
+      summary: Create a new discount
+      description: Adds a new discount to the system. **Access restricted to admin users only**.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                percentage:
+                  type: number
+                  format: double
+                  description: Discount percentage (must be between 0 and 100)
+                fixed:
+                  type: number
+                  format: double
+                  description: Fixed discount amount (must be greater than or equal to 0)
+                validFrom:
+                  type: string
+                  format: date-time
+                  description: The date and time when the discount becomes valid
+                validTo:
+                  type: string
+                  format: date-time
+                  description: The date and time when the discount expires
+                createdBy:
+                  type: string
+                  description: The ID of the person who created the discount
+      responses:
+        "201":
+          description: Discount created successfully
+        "400":
+          description: Invalid request data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only admin)
+        "500":
+          description: Internal server error
+
+  /discounts:
+    get:
+      tags:
+        - discount
+      summary: Retrieve a list of discounts
+      description: Fetches a list of discounts. **Access restricted to users with admin or manager roles**.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum length of returned list
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Ordering column name
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: validFrom
+          in: query
+          description: Filter discounts valid from this date and time
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: validTo
+          in: query
+          description: Filter discounts valid up to this date and time
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: A list of discounts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    discountId:
+                      type: string
+                      description: Unique ID of the discount
+                    percentage:
+                      type: number
+                      format: double
+                      description: Discount percentage
+                    fixed:
+                      type: number
+                      format: double
+                      description: Fixed discount amount
+                    validFrom:
+                      type: string
+                      format: date-time
+                      description: The date and time when the discount becomes valid
+                    validTo:
+                      type: string
+                      format: date-time
+                      description: The date and time when the discount expires
+                    createdAt:
+                      type: string
+                      format: date-time
+                      description: The date and time when the discount was created
+                    modifiedAt:
+                      type: string
+                      format: date-time
+                      description: The date and time when the discount was last modified
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only admin and Manager)
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /discounts/{discountId}:
+    get:
+      tags:
+        - discount
+      summary: Retrieve a single discount by ID
+      description: Fetches a discount's details based on the provided discount ID. **Access restricted to users with admin or manager roles**.
+      parameters:
+        - name: discountId
+          in: path
+          description: Unique identifier of the discount
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Discount details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  discountId:
+                    type: string
+                    description: Unique ID of the discount
+                  percentage:
+                    type: number
+                    format: double
+                    description: Discount percentage
+                  fixed:
+                    type: number
+                    format: double
+                    description: Fixed discount amount
+                  validFrom:
+                    type: string
+                    format: date-time
+                    description: The date and time when the discount becomes valid
+                  validTo:
+                    type: string
+                    format: date-time
+                    description: The date and time when the discount expires
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the discount was created
+                  modifiedAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the discount was last modified
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only admin and Manager)
+        "404":
+          description: Discount not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - discount
+      summary: Update an existing discount
+      description: Updates an existing discount based on the provided discount ID. **Access restricted to admin users only**.
+      parameters:
+        - name: discountId
+          in: path
+          required: true
+          description: Unique identifier of the discount to be updated
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                percentage:
+                  type: number
+                  format: double
+                  description: Discount percentage (must be between 0 and 100)
+                fixed:
+                  type: number
+                  format: double
+                  description: Fixed discount amount (must be greater than or equal to 0)
+                validFrom:
+                  type: string
+                  format: date-time
+                  description: The date and time when the discount becomes valid
+                validTo:
+                  type: string
+                  format: date-time
+                  description: The date and time when the discount expires
+                modifiedBy:
+                  type: string
+                  description: The user who modified the discount
+      responses:
+        "200":
+          description: Discount updated successfully
+        "400":
+          description: Invalid request data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only admin)
+        "404":
+          description: Discount not found
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - discount
+      summary: Delete a discount
+      description: Deletes a specified discount from the system. **Access restricted to admin users only**.
+      parameters:
+        - name: discountId
+          in: path
+          description: Unique identifier of the discount to be deleted
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Discount deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only admin)
+        "404":
+          description: Discount not found
+        "500":
+          description: Internal server error
+
+
+  /reservations:
+    post:
+      tags:
+        - reservation
+      summary: Create a new reservation
+      description: Creates a new reservation. **Access restricted to admin users only**.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reservationId:
+                  type: string
+                  format: uuid
+                restaurantId:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                reservationState:
+                  type: integer
+                  example: 0
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+                createdBy:
+                  type: string
+                  format: uuid
+      responses:
+        "201":
+          description: Reservation created successfully
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "500":
+          description: Internal server error
+
+    get:
+      tags:
+        - reservation
+      summary: Retrieve a list of reservations
+      description: Fetches a list of reservations. **Access restricted to users with appropriate roles**.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum length of returned list
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Ordering column name
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: reservationState
+          in: query
+          description: Filter reservations by their state.
+          required: false
+          schema:
+            type: integer
+            enum:
+              - active
+              - canceled
+        - name: startDate
+          in: query
+          description: Filter reservations created on or after this date.
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: Filter reservations created on or before this date.
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: A list of reservations retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    reservationId:
+                      type: string
+                      format: uuid
+                    restaurantId:
+                      type: string
+                      format: uuid
+                    name: 
+                      type: string
+                    reservationState:
+                      type: integer
+                      enum:
+                        - active
+                        - canceled
+                      example: "confirmed"
+                    startDate:
+                      type: string
+                      format: date-time
+                    endDate:
+                      type: string
+                      format: date-time
+                    createdAt:
+                      type: string
+                      format: date-time
+                    createdBy:
+                      type: string
+                      format: uuid
+                      description: The employee who created the reservation
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "500":
+          description: Internal server error
+
+  /reservations/{reservationId}:
+    get:
+      tags:
+        - reservation
+      summary: Retrieve a single reservation by ID
+      description: Fetches a reservation’s details based on the provided reservation ID. **Access restricted to users with appropriate roles**.
+      parameters:
+        - name: reservationId
+          in: path
+          description: Unique identifier of the reservation
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Reservation details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservationId:
+                    type: string
+                    format: uuid
+                  restaurantId:
+                    type: string
+                    format: uuid
+                  name: 
+                    type: string
+                  reservationState:
+                    type: integer
+                    enum:
+                      - active
+                      - canceled
+                    example: "confirmed"
+                  startDate:
+                    type: string
+                    format: date-time
+                  endDate:
+                    type: string
+                    format: date-time
+                  createdAt:
+                    type: string
+                    format: date-time
+                  createdBy:
+                    type: string
+                    format: uuid
+                    description: The employee who created the reservation
+        "400":
+          description: Invalid reservation ID
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Reservation not found
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - reservation
+      summary: Update a reservation
+      description: Updates a reservation's details. **Access restricted to admin users only**.
+      parameters:
+        - name: reservationId
+          in: path
+          description: Unique identifier of the reservation
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reservationId:
+                  type: string
+                restaurantId:
+                  type: string
+                  format: uuid
+                name: 
+                  type: string
+                reservationState:
+                  type: integer
+                  example: 0
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+                modifiedAt:
+                  type: string
+                  format: date-time
+                modifiedBy:
+                  type: string
+                  format: uuid
+                  description: The employee who modified the reservation
+      responses:
+        "200":
+          description: Reservation updated successfully
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Reservation not found
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - reservation
+      summary: Delete a reservation
+      description: Deletes a reservation based on the provided reservation ID. **Only admin users can delete reservations**.
+      parameters:
+        - name: reservationId
+          in: path
+          description: Unique identifier of the reservation
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Reservation deleted successfully
+        "400":
+          description: Invalid reservation ID
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Reservation not found
         "500":
           description: Internal server error
 
