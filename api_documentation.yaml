@@ -953,6 +953,34 @@ paths:
         "500":
           description: Internal server error
 
+  /reservations/cancel/{reservationId}:
+    post:
+      tags:
+        - reservation
+      summary: Cancels a reservation
+      description: Cancels a reservation based on the provided reservation ID.
+      parameters:
+        - name: reservationId
+          in: path
+          description: Unique identifier of the reservation
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Reservation cancelled successfully
+        "400":
+          description: Invalid reservation ID
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Reservation not found
+        "500":
+          description: Internal server error
+          
   /employees:
     post:
       tags:
