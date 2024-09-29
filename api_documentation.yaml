@@ -26,6 +26,10 @@ tags:
     description: Operations related to Product management
   - name: user
     description: Operations related to User management
+  - name: business
+    description: Operations related to Business management
+  - name: inventory
+    description: Operations related to Inventory management
 
 paths:
   /auth/token:
@@ -2547,6 +2551,616 @@ paths:
           description: Invalid request
         "404":
           description: User not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only Admin)
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+          
+  /business:
+    post:
+      tags:
+        - business
+      summary: Create a new business
+      description: Creates a new business.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                businessCode:
+                  type: string
+                  description: Business code
+                name:
+                  type: string
+                  description: Business name
+                phone:
+                  type: string
+                  description: Business phone number
+                email:
+                  type: string
+                  format: email
+                  description: Business email
+              required:
+                - businessCode
+                - name
+                - phone
+                - email
+      responses:
+        "201":
+          description: Business created successfully
+        "400":
+          description: Invalid business data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+    get:
+      tags:
+        - business
+      summary: Retrieve a list of businesses
+      description: Fetches a list of businesses.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum length of returned list
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Ordering column name
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: businessCode
+          in: query
+          description: Filter businesses by their business code
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: Filter businesses by their name
+          required: false
+          schema:
+            type: string
+        - name: phone
+          in: query
+          description: Filter businesses by their phone number
+          required: false
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: Filter businesses by their email
+          required: false
+          schema:
+            type: string
+            format: email
+        - name: createdAt
+          in: query
+          description: Filter businesses by date they were created
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: createdBy
+          in: query
+          description: Filter businesses by user who created them
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: modifiedAt
+          in: query
+          description: Filter businesses by when they were modified
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: modifiedBy
+          in: query
+          description: Filter businesses by user who last modified them
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: A list of businesses retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    businessCode:
+                      type: string
+                      description: Business Code
+                    name:
+                      type: string
+                      description: Name of the business
+                    phone:
+                      type: string
+                      description: Phone number of the business
+                    email:
+                      type: string
+                      format: email
+                      description: Email of the business
+                    createdAt:
+                      type: string
+                      format: date-time
+                      description: Date when business was first created
+                    createdBy:
+                      type: string
+                      format: uuid
+                      description: ID of the employee who created the business
+                    modifiedAt:
+                      type: string
+                      format: date-time
+                      description: Date when business was last modified
+                    modifiedBy:
+                      type: string
+                      format: uuid
+                      description: ID of the employee who last modified the business
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+          
+  /business/{businessId}:
+    get:
+      tags:
+        - business
+      summary: Retrieve a single business by ID
+      description: Fetches details of a business based on the provided business ID.
+      parameters:
+        - name: businessId
+          in: path
+          required: true
+          description: Unique identifier of the business
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Business details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  businessCode:
+                    type: string
+                    description: Business Code
+                  name:
+                    type: string
+                    description: Name of the business
+                  phone:
+                    type: string
+                    description: Phone number of the business
+                  email:
+                    type: string
+                    format: email
+                    description: Email of the business
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: Date when business was first created
+                  createdBy:
+                    type: string
+                    format: uuid
+                    description: ID of the employee who created the business
+                  modifiedAt:
+                    type: string
+                    format: date-time
+                    description: Date when business was last modified
+                  modifiedBy:
+                    type: string
+                    format: uuid
+                    description: ID of the employee who last modified the business
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+    put:
+      tags:
+        - business
+      summary: Update existing business
+      description: Updates existing business.
+      parameters:
+        - name: businessId
+          in: path
+          required: true
+          description: Unique identifier of the business
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                businessCode:
+                  type: string
+                  description: Business code
+                name:
+                  type: string
+                  description: Business name
+                phone:
+                  type: string
+                  description: Business phone
+                email:
+                  type: string
+                  format: email
+                  description: Business email
+              anyOf:
+                - required:
+                  - businessCode
+                - required:
+                  - name
+                - required:
+                  - phone
+                - required:
+                  - email
+      responses:
+        "200":
+          description: Business edited successfully
+        "400":
+          description: Invalid business data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Original business not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+    delete:
+      tags:
+        - business
+      summary: Delete business from working DB table
+      description: Deletes business data from working table.
+      parameters:
+        - name: businessId
+          in: path
+          required: true
+          description: Unique identifier of the business
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Business removed successfully
+        "400":
+          description: Invalid request
+        "404":
+          description: Business not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only Admin)
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+          
+  /inventory:
+    post:
+      tags:
+        - inventory
+      summary: Create a new inventory item
+      description: Creates a new inventory record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ProductId:
+                  type: string
+                  format: uuid
+                  description: Unique identifier of the product
+                ProductVariationId:
+                  type: string
+                  format: uuid
+                  description: Unique identifier of the product variation
+                Count:
+                  type: integer
+                  description: Number of items in stock
+              required:
+                - ProductId
+                - ProductVariationId
+                - Count
+      responses:
+        "201":
+          description: Inventory item created successfully
+        "400":
+          description: Invalid inventory data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+  
+    get:
+      tags:
+        - inventory
+      summary: Retrieve a list of inventory items
+      description: Fetches a list of inventory items.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Column to order results by
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: ProductId
+          in: query
+          description: Filter inventory by product ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: ProductVariationId
+          in: query
+          description: Filter inventory by product variation ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: Count
+          in: query
+          description: Filter inventory by count
+          required: false
+          schema:
+            type: integer
+        - name: createdAt
+          in: query
+          description: Filter inventory by creation date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: modifiedAt
+          in: query
+          description: Filter inventory by modification date
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: A list of inventory items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    InventoryId:
+                      type: string
+                      format: uuid
+                      description: Unique identifier of the inventory item
+                    ProductId:
+                      type: string
+                      format: uuid
+                      description: Unique identifier of the product
+                    ProductVariationId:
+                      type: string
+                      format: uuid
+                      description: Unique identifier of the product variation
+                    Count:
+                      type: integer
+                      description: Number of items in stock
+                    createdAt:
+                      type: string
+                      format: date-time
+                      description: Date when the inventory item was created
+                    modifiedAt:
+                      type: string
+                      format: date-time
+                      description: Date when the inventory item was last modified
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+  /inventory/{inventoryId}:
+    get:
+      tags:
+        - inventory
+      summary: Retrieve a specific inventory item by ID
+      description: Fetches details of an inventory item based on the provided inventory ID.
+      parameters:
+        - name: inventoryId
+          in: path
+          required: true
+          description: Unique identifier of the inventory item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Inventory item details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  InventoryId:
+                    type: string
+                    format: uuid
+                    description: Unique identifier of the inventory item
+                  ProductId:
+                    type: string
+                    format: uuid
+                    description: Unique identifier of the product
+                  ProductVariationId:
+                    type: string
+                    format: uuid
+                    description: Unique identifier of the product variation
+                  Count:
+                    type: integer
+                    description: Number of items in stock
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: Date when the inventory item was created
+                  modifiedAt:
+                    type: string
+                    format: date-time
+                    description: Date when the inventory item was last modified
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+    put:
+      tags:
+        - inventory
+      summary: Update existing inventory item
+      description: Updates an existing inventory item.
+      parameters:
+        - name: inventoryId
+          in: path
+          required: true
+          description: Unique identifier of the inventory item
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ProductId:
+                  type: string
+                  format: uuid
+                  description: Unique identifier of the product
+                ProductVariationId:
+                  type: string
+                  format: uuid
+                  description: Unique identifier of the product variation
+                Count:
+                  type: integer
+                  description: Number of items in stock
+              required:
+                - ProductId
+                - ProductVariationId
+                - Count
+      responses:
+        "200":
+          description: Inventory item updated successfully
+        "400":
+          description: Invalid inventory data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Inventory item not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+  
+    delete:
+      tags:
+        - inventory
+      summary: Delete inventory item
+      description: Deletes an inventory item from the system.
+      parameters:
+        - name: inventoryId
+          in: path
+          required: true
+          description: Unique identifier of the inventory item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Inventory item removed successfully
+        "400":
+          description: Invalid request
+        "404":
+          description: Inventory item not found
         "401":
           description: Unauthenticated user
         "403":
