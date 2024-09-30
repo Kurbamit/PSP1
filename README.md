@@ -39,6 +39,7 @@ Padarius pakeitimus supushinti juos į savo atskirą branch'ą ir tada pamergint
 - Dovydas: Product, User, CancelReservation
 - Gabrielis: Business, Inventory
 
+---
 - Dovydas: Sudėti API duomenų apribojimus. peržiūrėti endpointus, ar nėra klaidų ir t.t
 - Dominykas: Padaryti flowchart diagramą, auditavimas (aprašyti dokumente).
 - Rytis: Package diagrams
