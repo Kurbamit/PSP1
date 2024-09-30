@@ -38,3 +38,10 @@ Padarius pakeitimus supushinti juos į savo atskirą branch'ą ir tada pamergint
 - Brigita: Order, ProductVariation, CloseOrder, CancelOrder, RefundOrder
 - Dovydas: Product, User, CancelReservation
 - Gabrielis: Business, Inventory
+
+- Dovydas: Sudėti API duomenų apribojimus. peržiūrėti endpointus, ar nėra klaidų ir t.t
+- Dominykas: Padaryti flowchart diagramą, auditavimas (aprašyti dokumente).
+- Rytis: Package diagrams
+- Brigita: Pradėti dokumento aprašymą (Background, gal dar kažkas)
+- Gabrielis: endpointai user rolėm. peržiūrėti endpointus, ar nėra klaidų ir t.t
+
