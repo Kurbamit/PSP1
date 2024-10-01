@@ -26,6 +26,8 @@ Padarius pakeitimus supushinti juos į savo atskirą branch'ą ir tada pamergint
 - CloseOrder
 - CancelOrder
 - RefundOrder
+- Archive
+- RemoveFromArchive
 
 ### Reservation
 - CancelReservation
