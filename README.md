@@ -34,7 +34,7 @@ Padarius pakeitimus supushinti juos į savo atskirą branch'ą ir tada pamergint
 
 ---
 ### TODO:
-
+#### Iki 2024-09-30
 - Dominykas: Employee, GiftCard, Restaurant
 - Rytis: Discount, Reservation, Payment
 - Brigita: Order, ProductVariation, CloseOrder, CancelOrder, RefundOrder
@@ -42,6 +42,7 @@ Padarius pakeitimus supushinti juos į savo atskirą branch'ą ir tada pamergint
 - Gabrielis: Business, Inventory
 
 ---
+#### Iki 2024-10-07
 - Dovydas: Sudėti API duomenų apribojimus. peržiūrėti endpointus, ar nėra klaidų ir t.t
 - Dominykas: Padaryti flowchart diagramą, auditavimas (aprašyti dokumente).
 - Rytis: Package diagrams
