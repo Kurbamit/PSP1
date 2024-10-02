@@ -44,7 +44,7 @@ Padarius pakeitimus supushinti juos į savo atskirą branch'ą ir tada pamergint
 ---
 #### Iki 2024-10-07
 - Dovydas: Sudėti API duomenų apribojimus. peržiūrėti endpointus, ar nėra klaidų ir t.t
-- Dominykas: Padaryti flowchart diagramą, auditavimas (aprašyti dokumente).
+- Dominykas: Padaryti flowchart diagramą, auditavimas (aprašyti dokumente). Pakoreguoti data model. Aprašyti ```Roles and Permissions```.
 - Rytis: Package diagrams
 - Brigita: Pradėti dokumento aprašymą (Background, gal dar kažkas)
 - Gabrielis: endpointai user rolėm. peržiūrėti endpointus, ar nėra klaidų ir t.t
