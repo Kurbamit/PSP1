@@ -32,6 +32,8 @@ tags:
     description: Operations related to order variations
   - name: order
     description: Operations related to Orders
+  - name: sysparams
+    description: Operations related to System parameters
 
 paths:
   /auth/token:
@@ -4016,5 +4018,216 @@ paths:
           description: No permission (Only Admin)
         "405":
           description: Method not supported
+        "500":
+          description: Internal server error
+
+  /sysparams:
+    get:
+      tags:
+        - sysparams
+      summary: Retrieve a list of system parameters items
+      description: Fetches a list of system parameters items.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Column to order results by
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: ProductId
+          in: query
+          description: Filter system parameters by ID
+          required: false
+          schema:
+            type: integer
+        - name: friendlyName
+          in: query
+          description: Filter system parameters by friendly name
+          required: false
+          schema:
+            type: string
+        - name: Description
+          in: query
+          description: Filter system parameters by description
+          required: false
+          schema:
+            type: string
+        - name: createdAt
+          in: query
+          description: Filter system parameters by creation date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: modifiedAt
+          in: query
+          description: Filter system parameters by modification date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: value
+          in: query
+          description: Filter system parameters by value
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of inventory items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    SysParamId:
+                      type: integer
+                      description: Unique identifier of the system parameter item
+                    Name:
+                      type: string
+                      description: Unique name of the system parameter
+                    FriendlyName:
+                      type: string
+                      description: Friendly name of the system parameter
+                    Value:
+                      type: string
+                      description: Value of system parameter
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /sysparams/{sysparamId}:
+    get:
+      tags:
+        - sysparams
+      summary: Retrieve a specific system parameter item by ID
+      description: Fetches details of an system parameter item based on the provided ID.
+      parameters:
+        - name: sysparamId
+          in: path
+          required: true
+          description: Unique identifier of the system parameter item
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: System parameter item details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  SysParamId:
+                    type: integer
+                    description: Unique identifier of the system parameter item
+                  Name:
+                    type: string
+                    description: Name of system parameter
+                  FriendlyName:
+                    type: string
+                    description: Friendly name of system parameter
+                  Description:
+                    type: string
+                    description: Description of system parameter
+                  Value:
+                    type: string
+                    description: Value of the system parameter
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: Date when the system parameter item was created
+                  createdBy:
+                    type: string
+                    format: uuid
+                    description: Unique identifier of user that created system parameter
+                  modifiedAt:
+                    type: string
+                    format: date-time
+                    description: Date when the system parameter item was last modified
+                  modifiedBy:
+                    type: string
+                    format: uuid
+                    description: Unique identifier of user that last modified it
+                  businessId:
+                    type: string
+                    format: uuid
+                    description: Unique identifier of the business
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - sysparams
+      summary: Update existing system parameter's value
+      description: Updates an existing system parameter's value.
+      parameters:
+        - name: sysparamId
+          in: path
+          required: true
+          description: Unique identifier of the system parameter item
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                  description: New system parameter value
+              required:
+                - properties
+      responses:
+        "200":
+          description: System parameter item updated successfully
+        "400":
+          description: Invalid inventory data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Inventory item not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
         "500":
           description: Internal server error
