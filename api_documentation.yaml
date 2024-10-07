@@ -654,6 +654,10 @@ paths:
                   format: uuid
                 name:
                   type: string
+                guestNumber:
+                  type: integer
+                  description: Number of the guests
+                  example: 1
                 reservationState:
                   type: integer
                   example: 0
@@ -805,6 +809,9 @@ paths:
                   restaurantId:
                     type: string
                     format: uuid
+                  guestNumber:
+                    type: integer
+                    description: Number of the guests
                   name:
                     type: string
                   reservationState:
@@ -826,6 +833,13 @@ paths:
                     type: string
                     format: uuid
                     description: The employee who created the reservation
+                  modifiedAt:
+                    type: string
+                    format: date-time
+                  modifiedBy:
+                    type: string
+                    format: uuid
+                    description: The employee who modified the reservation
         "400":
           description: Invalid reservation ID
         "401":
@@ -873,6 +887,9 @@ paths:
                 endDate:
                   type: string
                   format: date-time
+                guestCount:
+                  type: integer
+                  description: Number of the guests
                 modifiedAt:
                   type: string
                   format: date-time
