@@ -49,3 +49,6 @@ Padarius pakeitimus supushinti juos į savo atskirą branch'ą ir tada pamergint
 - Brigita: Pradėti dokumento aprašymą (Background, gal dar kažkas)
 - Gabrielis: endpointai user rolėm. peržiūrėti endpointus, ar nėra klaidų ir t.t
 
+---
+#### Kažkada iki galo
+- Dominykas: Paredaguoti flowchart diagramas
