@@ -34,6 +34,8 @@ tags:
     description: Operations related to Orders
   - name: sysparams
     description: Operations related to System parameters
+  - name: tax
+    description: Operations related to Taxes
 
 paths:
   /auth/token:
@@ -678,7 +680,7 @@ paths:
                   example: 1
                 reservationState:
                   type: string
-                  enum: 
+                  enum:
                     - active
                     - cancelled
                     - completed
@@ -909,11 +911,11 @@ paths:
                 name:
                   type: string
                 reservationState:
-                    type: string
-                    enum:
-                      - active
-                      - cancelled
-                      - completed
+                  type: string
+                  enum:
+                    - active
+                    - cancelled
+                    - completed
                 startDate:
                   type: string
                   format: date-time
@@ -2030,9 +2032,6 @@ paths:
                 name:
                   type: string
                   description: Product name
-                tax:
-                  type: integer
-                  description: Percentage of tax applied to product
                 price:
                   type: number
                   format: double
@@ -2045,13 +2044,17 @@ paths:
                   type: string
                   format: uuid
                   description: ID of the business to which the product belongs
+                taxId:
+                  type: string
+                  format: uuid
+                  description: ID of the tax that is applied to this product
                 locationBusinessId:
                   type: string
                   format: uuid
                   description: ID of the business' location to which the product belongs
               required:
                 - name
-                - tax
+                - taxId
                 - price
                 - createdBy
                 - businessId
@@ -2112,7 +2115,8 @@ paths:
           description: Filter products by their tax
           required: false
           schema:
-            type: integer
+            type: string
+            format: uuid
         - name: price
           in: query
           description: Filter products by their price
@@ -2176,8 +2180,9 @@ paths:
                       type: string
                       description: Product name
                     tax:
-                      type: integer
-                      description: Percentage of tax applied to product
+                      type: string
+                      format: uuid
+                      description: ID of the tax that is applied to this product
                     price:
                       type: number
                       format: double
@@ -2242,9 +2247,10 @@ paths:
                   name:
                     type: string
                     description: Product name
-                  tax:
-                    type: integer
-                    description: Percentage of tax applied to product
+                  taxId:
+                    type: string
+                    format: uuid
+                    description: ID of tax that is applied to product
                   price:
                     type: number
                     format: double
@@ -2308,9 +2314,10 @@ paths:
                 name:
                   type: string
                   description: Product name
-                tax:
-                  type: integer
-                  description: Percentage of tax applied to product
+                taxId:
+                  type: string
+                  format: uuid
+                  description: Id of the tax that is applied to product
                 price:
                   type: number
                   format: double
@@ -2381,6 +2388,57 @@ paths:
           description: Method not supported
         "500":
           description: Internal server error
+
+  /product/{productId}/count:
+    put:
+      tags:
+        - product
+      summary: Update product count
+      description: Updates the stock count for an existing product based on the provided product ID. **Only authorized users** can update the count.
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: Unique identifier of the product
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                  description: The new count to be set for the product
+      responses:
+        "200":
+          description: Product count updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productId:
+                    type: string
+                    format: uuid
+                    description: The product ID
+                  count:
+                    type: integer
+                    description: The updated product count
+        "400":
+          description: Invalid request (e.g., invalid count or product ID)
+        "404":
+          description: Product not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "500":
+          description: Internal server error
+
   /user:
     post:
       tags:
@@ -4257,7 +4315,266 @@ paths:
           description: Invalid data
         "500":
           description: Internal server error
-          
+
+  /tax:
+    post:
+      tags:
+        - tax
+      summary: Create a new tax item
+      description: Creates a new tax record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Tax:
+                  type: integer
+                  description: Tax number
+              required:
+                - Tax
+      responses:
+        "201":
+          description: Tax item created successfully
+        "400":
+          description: Invalid tax data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+
+    get:
+      tags:
+        - tax
+      summary: Retrieve a list of tax items
+      description: Fetches a list of tax items.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Column to order results by
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: ProductId
+          in: query
+          description: Filter tax by product ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: Tax
+          in: query
+          description: Filter tax by integer value
+          required: false
+          schema:
+            type: integer
+        - name: createdAt
+          in: query
+          description: Filter tax by creation date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: modifiedAt
+          in: query
+          description: Filter tax by modification date
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: A list of axetrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    TaxId:
+                      type: string
+                      format: uuid
+                      description: Unique identifier of the tax item
+                    ProductId:
+                      type: array
+                      items:
+                        type: string
+                        format: uuid
+                        description: List of product IDS that this tax applies to
+                    createdAt:
+                      type: string
+                      format: date-time
+                      description: Date when the inventory item was created
+                    modifiedAt:
+                      type: string
+                      format: date-time
+                      description: Date when the inventory item was last modified
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /tax/{taxId}:
+    get:
+      tags:
+        - tax
+      summary: Retrieve a specific tax item by ID
+      description: Fetches details of an tax item based on the provided tax ID.
+      parameters:
+        - name: taxId
+          in: path
+          required: true
+          description: Unique identifier of the tax item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Tax item details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  TaxId:
+                    type: string
+                    format: uuid
+                    description: Unique identifier of the tax item
+                  Tax:
+                    type: integer
+                    description: Tax integer value
+                  ProductId:
+                    type: array
+                    items:
+                      type: string
+                      format: uuid
+                      description: Unique identifier of the product that this tax applies to
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: Date when the tax item was created
+                  modifiedAt:
+                    type: string
+                    format: date-time
+                    description: Date when the tax last modified
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - tax
+      summary: Update existing tax item
+      description: Updates an existing ax
+      parameters:
+        - name: taxId
+          in: path
+          required: true
+          description: Unique identifier of the tax item
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Tax:
+                  type: integer
+                  description: Tax integer value
+                ProductId:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                    description: Unique identifier of the product variation
+              required:
+                - Tax
+                - ProductId
+      responses:
+        "200":
+          description: Tax item updated successfully
+        "400":
+          description: Invalid tax data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Tax item not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - tax
+      summary: Delete tax item
+      description: Deletes an tax item from the system.
+      parameters:
+        - name: taxId
+          in: path
+          required: true
+          description: Unique identifier of the tax item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Tax item removed successfully
+        "400":
+          description: Invalid request
+        "404":
+          description: Tax item not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only Admin)
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
 components:
   schemas:
     workingHours:
