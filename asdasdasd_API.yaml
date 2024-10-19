@@ -36,6 +36,10 @@ tags:
     description: Operations related to System parameters
   - name: tax
     description: Operations related to Taxes
+  - name: locationProduct
+    description: Operations related to Location product
+  - name: customer
+    description: Operations related to Customers
 
 paths:
   /auth/token:
@@ -2027,38 +2031,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  description: Product name
-                price:
-                  type: number
-                  format: double
-                  description: Product price without tax
-                createdBy:
-                  type: string
-                  format: uuid
-                  description: ID of the employee who created the product
-                businessId:
-                  type: string
-                  format: uuid
-                  description: ID of the business to which the product belongs
-                taxId:
-                  type: string
-                  format: uuid
-                  description: ID of the tax that is applied to this product
-                locationBusinessId:
-                  type: string
-                  format: uuid
-                  description: ID of the business' location to which the product belongs
-              required:
-                - name
-                - taxId
-                - price
-                - createdBy
-                - businessId
-                - locationBusinessId
+              $ref: "#/components/schemas/product"
       responses:
         "201":
           description: Product created successfully
@@ -2174,43 +2147,22 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                      description: Product name
-                    tax:
-                      type: string
-                      format: uuid
-                      description: ID of the tax that is applied to this product
-                    price:
-                      type: number
-                      format: double
-                      description: Product price without tax
-                    createdAt:
-                      type: string
-                      format: date-time
-                      description: Date when product was first created
-                    modifiedAt:
-                      type: string
-                      format: date-time
-                      description: Date when product was last modified
-                    modifiedBy:
-                      type: string
-                      format: uuid
-                      description: ID of the employee who last modified the product
-                    createdBy:
-                      type: string
-                      format: uuid
-                      description: ID of the employee who created the product
-                    businessId:
-                      type: string
-                      format: uuid
-                      description: ID of the business to which the product belongs
-                    locationBusinessId:
-                      type: string
-                      format: uuid
-                      description: ID of the business' location to which the product belongs
+                  allOf:
+                    - $ref: "#/components/schemas/product"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when product was first created
+                        modifiedAt:
+                          type: string
+                          format: date-time
+                          description: Date when product was last modified
+                        modifiedBy:
+                          type: string
+                          format: uuid
+                          description: ID of the employee who last modified the product
         "400":
           description: Invalid request
         "401":
@@ -2242,43 +2194,22 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  name:
-                    type: string
-                    description: Product name
-                  taxId:
-                    type: string
-                    format: uuid
-                    description: ID of tax that is applied to product
-                  price:
-                    type: number
-                    format: double
-                    description: Product price without tax
-                  createdAt:
-                    type: string
-                    format: date-time
-                    description: Date when product was first created
-                  modifiedAt:
-                    type: string
-                    format: date-time
-                    description: Date when product was last modified
-                  modifiedBy:
-                    type: string
-                    format: uuid
-                    description: ID of the employee who last modified the product
-                  createdBy:
-                    type: string
-                    format: uuid
-                    description: ID of the employee who created the product
-                  businessId:
-                    type: string
-                    format: uuid
-                    description: ID of the business to which the product belongs
-                  locationBusinessId:
-                    type: string
-                    format: uuid
-                    description: ID of the business' location to which the product belongs
+                allOf:
+                  - $ref: "#/components/schemas/product"
+                  - type: object
+                    properties:
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date when product was first created
+                      modifiedAt:
+                        type: string
+                        format: date-time
+                        description: Date when product was last modified
+                      modifiedBy:
+                        type: string
+                        format: uuid
+                        description: ID of the employee who last modified the product
         "400":
           description: Invalid request
         "404":
@@ -2452,21 +2383,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                  description: Username
-                passwordHash:
-                  type: string
-                  description: Hashed user password
-                email:
-                  type: string
-                  description: User email address
-              required:
-                - username
-                - passwordHash
-                - email
+              $ref: "#/components/schemas/user"
       responses:
         "201":
           description: User created successfully
@@ -2547,21 +2464,14 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    username:
-                      type: string
-                      description: Username
-                    passwordHash:
-                      type: string
-                      description: Hashed user password
-                    email:
-                      type: string
-                      description: User email address
-                    createdAt:
-                      type: string
-                      format: date-time
-                      description: Date when user was created
+                  allOf:
+                    - $ref: "#/components/schemas/user"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when user was created
         "400":
           description: Invalid request
         "401":
@@ -2595,21 +2505,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  username:
-                    type: string
-                    description: Username
-                  passwordHash:
-                    type: string
-                    description: Hashed user password
-                  email:
-                    type: string
-                    description: User's email address
-                  createdAt:
-                    type: string
-                    format: date-time
-                    description: Date when user was created
+                  allOf:
+                    - $ref: "#/components/schemas/user"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when user was created
         "400":
           description: Invalid request
         "404":
@@ -4500,7 +4403,7 @@ paths:
       tags:
         - tax
       summary: Update existing tax item
-      description: Updates an existing ax
+      description: Updates an existing tax item
       parameters:
         - name: taxId
           in: path
@@ -4549,6 +4452,8 @@ paths:
     delete:
       tags:
         - tax
+      security:
+        - bearerAuth: []
       summary: Delete tax item
       description: Deletes an tax item from the system.
       parameters:
@@ -4570,6 +4475,327 @@ paths:
           description: Unauthenticated user
         "403":
           description: No permission (Only Admin)
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+  /locationProduct:
+    post:
+      summary: Create a location product
+      tags:
+        - locationProduct
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/locationProduct'
+      responses:
+        "201":
+          description: Location product created successfully
+        "400":
+          description: Invalid request
+    get:
+      tags:
+        - locationProduct
+      security:
+        - bearerAuth: []
+      summary: Retrieve a list of location products.
+      description: Fetches a list of location products.
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Column to order results by
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: ProductId
+          in: query
+          description: Filter location products by product ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: ProductVariationID
+          in: query
+          description: Filter location products by product variation ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: LocationBusinessID
+          in: query
+          description: Filter location products by location business ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: A list of location products retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationProduct'
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+  /locationProduct/{locationProductID}:
+    delete:
+      tags:
+        - locationProduct
+      security:
+        - bearerAuth: []
+      summary: Delete location product
+      description: Deletes a location product from the system.
+      parameters:
+        - name: locationProductID
+          in: path
+          required: true
+          description: Unique identifier of the location product
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Location product item removed successfully
+        "400":
+          description: Invalid request
+        "404":
+          description: Location product item not found
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission (Only Admin)
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+          
+  /customer:
+    post:
+      tags:
+        - customer
+      security:
+        - bearerAuth: []
+      summary: Create a new customer
+      description: Creates a new customer entry into the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/customer"
+      responses:
+        "201":
+          description: Customer created successfully
+        "400":
+          description: Invalid customer data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+    
+    get:
+      tags:
+        - customer
+      summary: Get a list of customers.
+      description: Gets a list of all customer entries in the system.
+      parameters:
+      - name: resultCount
+        in: query
+        description: Maximum number of items to return
+        required: true
+        schema:
+          type: integer
+      - name: pageIndex
+        in: query
+        description: Page index number
+        required: true
+        schema:
+          type: integer
+      - name: orderingColumn
+        in: query
+        description: Column to order results by
+        required: true
+        schema:
+          type: string
+      - name: orderingDirection
+        in: query
+        description: Ordering direction (0 - asc, 1 - desc)
+        required: true
+        schema:
+          type: integer
+      - name: CustomerID
+        in: query
+        description: Filter customers by customer ID
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: CustomerSurname
+        in: query
+        description: Filter customers by surname
+        required: false
+        schema:
+          type: string
+      - name: CustomerPhoneNumber
+        in: query
+        description: Filter customers by phone number
+        required: false
+        schema:
+          type: string
+          format: phone
+      responses:
+        "200":
+          description: A list of customers retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/customer"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when customer was first created
+                        modifiedAt:
+                          type: string
+                          format: date-time
+                          description: Date when customer was last modified
+                        modifiedBy:
+                          type: string
+                          format: uuid
+                          description: ID of the employee who last modified the customer
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /customer/{customerId}:
+    put:
+      tags:
+        - customer
+      security:
+        - bearerAuth: []
+      summary: Update an existing customer
+      description: Updates the name, surname, or phone number of an existing customer.
+      parameters:
+        - name: customerId
+          in: path
+          description: Unique identifier of customer
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                CustomerName:
+                  type: string
+                  description: New customer name
+                CustomerSurname:
+                  type: string
+                  description: New customer surname
+                CustomerPhoneNumber:
+                  type: string
+                  format: phone
+                  description: New customer phone number
+              anyOf:
+                - required:
+                  - CustomerName
+                - required:
+                  - CustomerSurname
+                - required:
+                  - CustomerPhoneNumber
+      responses:
+        "200":
+          description: Customer updated successfully
+        "400":
+          description: Invalid request or customer data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Customer not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+          
+    delete:
+      tags:
+        - customer
+      security:
+        - bearerAuth: []
+      summary: Delete an existing customer
+      description: Deletes a customer from the system.
+      parameters:
+        - name: customerId
+          in: path
+          description: Unique identifier of the customer
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Customer deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Customer not found
         "405":
           description: Method not supported
         "500":
@@ -4608,6 +4834,84 @@ components:
         - locationId
         - dayOfWeek
         - endTime
+    locationProduct:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+        productVariationId:
+          type: string
+          format: uuid
+        locationId:
+          type: string
+          format: uuid
+      required:
+        - productId
+        - productVariationId
+        - locationId
+    product:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Product name
+        price:
+          type: number
+          format: double
+          description: Product price without tax
+        createdBy:
+          type: string
+          format: uuid
+          description: ID of the employee who created the product
+        businessId:
+          type: string
+          format: uuid
+          description: ID of the business to which the product belongs
+        taxId:
+          type: string
+          format: uuid
+          description: ID of the tax that is applied to this product
+        locationBusinessId:
+          type: string
+          format: uuid
+          description: ID of the business' location to which the product belongs
+      required:
+        - name
+        - taxId
+        - price
+        - createdBy
+        - businessId
+        - locationBusinessId
+    user:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Username
+        passwordHash:
+          type: string
+          description: Hashed user password
+        email:
+          type: string
+          description: User email address
+      required:
+        - username
+        - passwordHash
+        - email
+    customer:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Customer first name
+        surname:
+          type: string
+          description: Customer surname
+        phoneNumber:
+          type: string
+          format: phone
+          description: Customer phone number
 
   securitySchemes:
     bearerAuth:
