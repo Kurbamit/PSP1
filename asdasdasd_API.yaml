@@ -474,8 +474,7 @@ paths:
                     - Percentage
                   description: New discount type
                 value:
-                  type: number
-                  format: double
+                  type: string
                   description: New discount value
                 validFrom:
                   type: string
@@ -856,7 +855,6 @@ paths:
           required: false
           schema:
             type: string
-            format: double
         - name: maxSalary
           in: query
           description: Filter employees by salary
@@ -950,8 +948,7 @@ paths:
                   type: string
                   description: New surname of the employee
                 salary:
-                  type: number
-                  format: double
+                  type: string
                   description: New salary of the employee
               anyOf:
                 - required:
@@ -1078,8 +1075,7 @@ paths:
           description: Filter gift cards by their price
           required: false
           schema:
-            type: number
-            format: double
+            type: string
         - name: code
           in: query
           description: Filter gift cards by their code
@@ -1183,8 +1179,7 @@ paths:
               type: object
               properties:
                 price:
-                  type: number
-                  format: double
+                  type: string
                   description: Price of the gift card
                 code:
                   type: string
@@ -1334,8 +1329,7 @@ paths:
           description: Filter products by their price
           required: false
           schema:
-            type: number
-            format: double
+            type: string
         - name: createdAt
           in: query
           description: Filter products by date they were created
@@ -1493,8 +1487,7 @@ paths:
                   format: uuid
                   description: Id of the tax that is applied to product
                 price:
-                  type: number
-                  format: double
+                  type: string
                   description: Product price without tax
                 businessId:
                   type: string
@@ -1892,8 +1885,7 @@ paths:
           description: Filter orders by their price
           required: false
           schema:
-            type: number
-            format: double
+            type: string
         - name: createdAt
           in: query
           description: Filter orders by their creation date
@@ -1957,8 +1949,7 @@ paths:
                       format: uuid
                       description: Unique ID of the order
                     price:
-                      type: number
-                      format: double
+                      type: string
                       description: Price of the order
                     OrderStatusEnum:
                       type: string
@@ -2003,8 +1994,7 @@ paths:
                       format: uuid
                       description: Optional discount applied to the order
                     tip:
-                      type: number
-                      format: double
+                      type: string
                       description: Optional tip added by the customer
         "400":
           description: Invalid request
@@ -2044,8 +2034,7 @@ paths:
                     format: uuid
                     description: Unique ID of the order
                   price:
-                    type: number
-                    format: double
+                    type: string
                     description: Price of the order
                   createdAt:
                     type: string
@@ -2138,8 +2127,7 @@ paths:
                   format: uuid
                   description: Optional discount applied to the order
                 tip:
-                  type: number
-                  format: double
+                  type: string
                   description: Optional tip added by the customer
                 businessId:
                   type: string
@@ -2315,8 +2303,7 @@ paths:
                 name:
                   type: string
                 additionalPrice:
-                  type: number
-                  format: double
+                  format: string
                   description: Price of the product variation
               required:
                 - productId
@@ -2371,8 +2358,7 @@ paths:
           description: Filter product variations by their price
           required: false
           schema:
-            type: number
-            format: double
+            type: string
         - name: createdAt
           in: query
           description: Filter product variations by their creation date
@@ -2426,8 +2412,7 @@ paths:
                       type: string
                       description: Name of the product variation
                     additionalPrice:
-                      type: number
-                      format: double
+                      type: string
                       description: Price of the product variation
                     createdAt:
                       type: string
@@ -2490,8 +2475,7 @@ paths:
                     type: string
                     description: Name of the product variation
                   additionalPrice:
-                    type: number
-                    format: double
+                    type: string
                     description: Price of the product variation
                   createdAt:
                     type: string
@@ -2552,8 +2536,7 @@ paths:
                   type: string
                   description: Name of the product variation
                 additionalPrice:
-                  type: number
-                  format: double
+                  type: string
                   description: Price of the product variation
               anyOf:
                 - required:
@@ -3527,8 +3510,7 @@ paths:
               type: object
               properties:
                 Tax:
-                  type: number
-                  format: float
+                  type: string
                   description: Tax value
               required:
                 - Tax
@@ -4548,8 +4530,7 @@ paths:
         description: Filter services by price
         required: false
         schema:
-          type: number
-          format: double
+          type: string
       responses:
         "200":
           description: A list of contact info retrieved successfully
@@ -4637,8 +4618,7 @@ paths:
                   type: integer
                   description: New duration (in minutes)
                 Price:
-                  type: number
-                  format: double
+                  type: string
                   description: New price of the service
               anyOf:
                 - required:
@@ -5941,8 +5921,7 @@ components:
           type: string
           description: Product name
         price:
-          type: number
-          format: double
+          type: string
           description: Product price without tax
         createdBy:
           type: string
@@ -6004,8 +5983,7 @@ components:
       type: object
       properties:
         Tax:
-          type: number
-          format: double
+          type: string
           description: Tax amount
         description:
           type: string
@@ -6051,7 +6029,7 @@ components:
         street:
           type: string
         number:
-          type: integer
+          type: string
         postcode:
           type: string
         phone:
@@ -6082,8 +6060,7 @@ components:
           type: integer
           description: Duration of the service in minutes
         price:
-          type: number
-          format: double
+          type: string
           description: Price of the service
       required:
         - locationId
@@ -6150,8 +6127,7 @@ components:
         surname:
           type: string
         salary:
-          type: number
-          format: double
+          type: string
         userTypeID:
           type: string
           format: uuid
@@ -6243,8 +6219,7 @@ components:
             - Fixed
             - Percentage
         value:
-          type: number
-          format: double
+          type: string
         currency:
           type: string
           enum:
@@ -6279,8 +6254,7 @@ components:
           type: string
           format: uuid
         paymentSize:
-          type: number
-          format: double
+          type: string
         currency:
           type: string
           enum:
