@@ -16,8 +16,6 @@ tags:
     description: Operations related to Discounts
   - name: giftCard
     description: Operations related to GiftCard management
-  - name: restaurant
-    description: Operations related to Restaurant management
   - name: reservation
     description: Operations related to Reservation management
   - name: product
@@ -160,6 +158,8 @@ paths:
         tags:
           - payment
         summary: Retrieve a list of payment entries
+        security:
+          - bearerAuth: []
         parameters:
           - name: resultCount
             in: query
@@ -223,6 +223,8 @@ paths:
       get:
         tags:
           - payment
+        security:
+          - bearerAuth: []
         summary: Retrieve a specific payment item by ID
         description: Fetches details of a payment item based on the provided payment ID.
         parameters:
@@ -276,8 +278,7 @@ paths:
                 type: object
                 properties:
                   paymentSize:
-                    type: number
-                    format: double
+                    type: string
                     description: Updated payment size
                   state:
                     type: string
@@ -339,6 +340,8 @@ paths:
       tags:
         - discount
       summary: Retrieve a list of discount entries
+      security:
+        - bearerAuth: []
       parameters:
       - name: resultCount
         in: query
@@ -411,6 +414,8 @@ paths:
       tags:
         - discount
       summary: Retrieve a specific discount item by ID
+      security:
+        - bearerAuth: []
       description: Fetches details of a discount based on the provided ID.
       parameters:
         - name: discountID
@@ -538,7 +543,6 @@ paths:
         "500":
           description: Internal server error
 
-
   /reservations:
     post:
       tags:
@@ -552,35 +556,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                reservationId:
-                  type: string
-                  format: uuid
-                restaurantId:
-                  type: string
-                  format: uuid
-                name:
-                  type: string
-                guestNumber:
-                  type: integer
-                  description: Number of the guests
-                  example: 1
-                reservationState:
-                  type: string
-                  enum:
-                    - active
-                    - cancelled
-                    - completed
-                startDate:
-                  type: string
-                  format: date-time
-                endDate:
-                  type: string
-                  format: date-time
-                createdBy:
-                  type: string
-                  format: uuid
+              $ref: "#/components/schemas/reservation"
       responses:
         "201":
           description: Reservation created successfully
@@ -603,7 +579,7 @@ paths:
       parameters:
         - name: resultCount
           in: query
-          description: Maximum length of returned list
+          description: Maximum number of items to return
           required: true
           schema:
             type: integer
@@ -615,7 +591,7 @@ paths:
             type: integer
         - name: orderingColumn
           in: query
-          description: Ordering column name
+          description: Column to order results by
           required: true
           schema:
             type: string
@@ -657,36 +633,9 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    reservationId:
-                      type: string
-                      format: uuid
-                    restaurantId:
-                      type: string
-                      format: uuid
-                    name:
-                      type: string
-                    reservationState:
-                      type: string
-                      enum:
-                        - active
-                        - cancelled
-                        - completed
-                      example: "confirmed"
-                    startDate:
-                      type: string
-                      format: date-time
-                    endDate:
-                      type: string
-                      format: date-time
-                    createdAt:
-                      type: string
-                      format: date-time
-                    createdBy:
-                      type: string
-                      format: uuid
-                      description: The employee who created the reservation
+                  allOf:
+                    - $ref: "#/components/schemas/reservation"
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -718,46 +667,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  reservationId:
-                    type: string
-                    format: uuid
-                  restaurantId:
-                    type: string
-                    format: uuid
-                  guestNumber:
-                    type: integer
-                    description: Number of the guests
-                  name:
-                    type: string
-                  reservationState:
-                    type: string
-                    enum:
-                      - active
-                      - cancelled
-                      - completed
-                    example: "confirmed"
-                  startDate:
-                    type: string
-                    format: date-time
-                  endDate:
-                    type: string
-                    format: date-time
-                  createdAt:
-                    type: string
-                    format: date-time
-                  createdBy:
-                    type: string
-                    format: uuid
-                    description: The employee who created the reservation
-                  modifiedAt:
-                    type: string
-                    format: date-time
-                  modifiedBy:
-                    type: string
-                    format: uuid
-                    description: The employee who modified the reservation
+                allOf:
+                  - $ref: "#/components/schemas/reservation"
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid reservation ID
         "401":
@@ -789,37 +701,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                reservationId:
-                  type: string
-                restaurantId:
-                  type: string
-                  format: uuid
-                name:
-                  type: string
-                reservationState:
-                  type: string
-                  enum:
-                    - active
-                    - cancelled
-                    - completed
-                startDate:
-                  type: string
-                  format: date-time
-                endDate:
-                  type: string
-                  format: date-time
-                guestCount:
-                  type: integer
-                  description: Number of the guests
-                modifiedAt:
-                  type: string
-                  format: date-time
-                modifiedBy:
-                  type: string
-                  format: uuid
-                  description: The employee who modified the reservation
+              $ref: "#/components/schemas/reservation"
       responses:
         "200":
           description: Reservation updated successfully
@@ -838,7 +720,7 @@ paths:
       tags:
         - reservation
       summary: Delete a reservation
-      description: Deletes a reservation based on the provided reservation ID. **Only admin users can delete reservations**.
+      description: Deletes a reservation based on the provided reservation ID.
       security:
         - bearerAuth: []
       parameters:
@@ -867,8 +749,10 @@ paths:
     post:
       tags:
         - reservation
-      summary: Cancels a reservation
+      summary: Cancel a reservation
       description: Cancels a reservation based on the provided reservation ID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: reservationId
           in: path
@@ -890,7 +774,7 @@ paths:
           description: Reservation not found
         "500":
           description: Internal server error
-
+  
   /employee:
       post:
         tags:
@@ -919,6 +803,8 @@ paths:
       get:
         tags:
           - employee
+        security:
+          - bearerAuth: []
         summary: Retrieve a list of employee entries
         parameters:
         - name: resultCount
@@ -964,13 +850,19 @@ paths:
           required: false
           schema:
             type: string
-        - name: salary
+        - name: minSalary
           in: query
           description: Filter employees by salary
           required: false
           schema:
-            type: number
+            type: string
             format: double
+        - name: maxSalary
+          in: query
+          description: Filter employees by salary
+          required: false
+          schema:
+            type: string
         responses:
           "200":
             description: A list of employee entries retrieved successfully
@@ -997,6 +889,8 @@ paths:
     get:
       tags:
         - employee
+      security:
+        - bearerAuth: []
       summary: Retrieve a specific employee item by ID
       description: Fetches details of an employee item based on the provided employee ID.
       parameters:
@@ -1120,29 +1014,17 @@ paths:
       tags:
         - giftCard
       summary: Create a new gift card
+      security:
+        - bearerAuth: []
       description: Creates a new gift card and puts data into GiftCardAudit table with DB triggers.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                price:
-                  type: number
-                  format: double
-                  description: Price of the gift card
-                validTo:
-                  type: string
-                  format: date
-                  description: Gift card valid to date
-                business_id:
-                  type: string
-                  format: uuid
-                  description: ID of the business the employee belongs to
-              required:
-                - number
-                - business_id
+              allOf:
+                - $ref: "#/components/schemas/giftcard"
+                - $ref: "#/components/schemas/AuditInfo"
       responses:
         "201":
           description: Gift card created successfully
@@ -1163,6 +1045,8 @@ paths:
       tags:
         - giftCard
       summary: Retrieve a list of gift cards
+      security:
+        - bearerAuth: []
       description: Fetches a list of gift cards.
       parameters:
         - name: resultCount
@@ -1224,27 +1108,9 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      format: uuid
-                      description: Unique ID of the gift card
-                    price:
-                      type: number
-                      format: double
-                      description: Price of the gift card
-                    code:
-                      type: string
-                      description: Code of the gift card
-                    validTo:
-                      type: string
-                      format: date
-                      description: Valid to date
-                    business_id:
-                      type: string
-                      format: uuid
-                      description: ID of the business the gift card belongs to
+                  allOf:
+                    - $ref: "#/components/schemas/employee"
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -1258,6 +1124,8 @@ paths:
 
   /giftCard/{giftCardId}:
     get:
+      security:
+        - bearerAuth: []
       tags:
         - giftCard
       summary: Retrieve a single giftCard by ID
@@ -1276,38 +1144,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    description: Unique ID of the gift card
-                  price:
-                    type: number
-                    format: double
-                    description: Price of the gift card
-                  code:
-                    type: string
-                    description: Code of the gift card
-                  validTo:
-                    type: string
-                    format: date
-                    description: Valid to date
-                  createdAt:
-                    type: string
-                    format: date-time
-                    description: Created at date and time
-                  createdByName:
-                    type: string
-                    description: Employee's name who created gift card
-                  createdById:
-                    type: string
-                    format: uuid
-                    description: Employee's id who created gift card
-                  business_id:
-                    type: string
-                    format: uuid
-                    description: ID of the business the gift card belongs to
+                allOf:
+                  - $ref: "#/components/schemas/giftcard"
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "404":
@@ -1325,7 +1164,9 @@ paths:
       tags:
         - giftCard
       summary: Update existing gift card
-      description: Updates existing gift card and puts old data into GiftCardAudit table with DB triggers. **Only admin users** can add the `business_id`.
+      security:
+        - bearerAuth: []
+      description: Updates existing gift card and puts old data into GiftCardAudit table with DB triggers.
       parameters:
         - name: giftCardId
           in: path
@@ -1414,372 +1255,6 @@ paths:
         "500":
           description: Internal server error
 
-  /restaurant:
-    post:
-      tags:
-        - restaurant
-      summary: Create new restaurant
-      description: Creates a new restaurant entity and puts data into RestaurantAudit table with DB triggers.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  description: Restaurant name
-                country:
-                  type: string
-                  description: Country name
-                city:
-                  type: string
-                  description: City name
-                street:
-                  type: string
-                  description: Street name
-                number:
-                  type: string
-                  description: House number
-                postCode:
-                  type: string
-                  description: Post code
-                business_id:
-                  type: string
-                  format: uuid
-                  description: ID of the business the employee belongs to
-              required:
-                - name
-                - country
-                - city
-                - street
-                - number
-                - postCode
-                - business_id
-      responses:
-        "201":
-          description: Restaurant card created successfully
-        "400":
-          description: Invalid restaurant data
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission (Only admin or manager)
-        "405":
-          description: Method not supported
-        "422":
-          description: Invalid data
-        "500":
-          description: Internal server error
-
-    get:
-      tags:
-        - restaurant
-      summary: Retrieve a list of business's restaurants
-      description: Fetches a list of restaurants. **Only admin users** can add the `business_id`.
-      parameters:
-        - name: resultCount
-          in: query
-          description: Maximum length of returned list
-          required: true
-          schema:
-            type: integer
-        - name: pageIndex
-          in: query
-          description: Page index number
-          required: true
-          schema:
-            type: integer
-        - name: orderingColumn
-          in: query
-          description: Ordering column name
-          required: true
-          schema:
-            type: string
-        - name: orderingDirection
-          in: query
-          description: Ordering direction (0 - asc, 1 - desc)
-          required: true
-          schema:
-            type: integer
-        - name: name
-          in: query
-          description: Filter restaurant by their name
-          required: false
-          schema:
-            type: string
-        - name: code
-          in: query
-          description: Filter restaurants by their code
-          required: false
-          schema:
-            type: integer
-        - name: country
-          in: query
-          description: Filter restaurants by their country
-          required: false
-          schema:
-            type: string
-        - name: city
-          in: query
-          description: Filter restaurants by city
-          required: false
-          schema:
-            type: string
-        - name: street
-          in: query
-          description: Filter restaurants by street
-          required: false
-          schema:
-            type: string
-        - name: number
-          in: query
-          description: Filter restaurants by number
-          required: false
-          schema:
-            type: string
-        - name: postCode
-          in: query
-          description: Filter restaurants by postCode
-          required: false
-          schema:
-            type: string
-        - name: businessId
-          in: query
-          description: Filter restaurants by business **(only admin)**
-          required: false
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: A list of restaurants retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      format: uuid
-                      description: Unique ID of the restaurant
-                    name:
-                      type: string
-                      description: Name of the restaurant
-                    code:
-                      type: string
-                      description: Code of the restaurant
-                    fullAddress:
-                      type: string
-                      description: Full address of the restaurant
-                    business_id:
-                      type: string
-                      format: uuid
-                      description: ID of the business the restaurant belongs to
-        "400":
-          description: Invalid request
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
-        "405":
-          description: Method not supported
-        "500":
-          description: Internal server error
-
-  /restaurant/{restaurantId}:
-    get:
-      tags:
-        - restaurant
-      summary: Retrieve a single restaurant by ID
-      description: Fetches an restaurant's details based on the provided restaurant ID.
-      parameters:
-        - name: restaurantId
-          in: path
-          required: true
-          description: Unique identifier of the restaurant
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: Restaurant details retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    description: Unique ID of the restaurant
-                  code:
-                    type: string
-                    description: Code of the restaurant
-                  name:
-                    type: string
-                    description: Name of the restaurant
-                  country:
-                    type: string
-                    description: Country of the restaurant
-                  city:
-                    type: string
-                    description: City of the restaurant
-                  street:
-                    type: string
-                    description: Street of the restaurant
-                  number:
-                    type: string
-                    description: Number of the restaurant
-                  postCode:
-                    type: string
-                    description: Post code of the restaurant
-                  addressId:
-                    type: string
-                    format: uuid
-                    description: Address table's id
-                  createdAt:
-                    type: string
-                    format: date-time
-                    description: Created at date and time
-                  createdByName:
-                    type: string
-                    description: Employee's name who created restaurant
-                  createdById:
-                    type: string
-                    format: uuid
-                    description: Employee's id who created restaurant
-                  business_id:
-                    type: string
-                    format: uuid
-                    description: ID of the business the restaurant belongs to
-        "400":
-          description: Invalid request
-        "404":
-          description: Restaurant not found
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
-        "405":
-          description: Method not supported
-        "500":
-          description: Internal server error
-
-    put:
-      tags:
-        - restaurant
-      summary: Update existing restaurant
-      description: Updates existing restaurant and puts old data into RestaurantAudit table with DB triggers. **Only admin users** can add the `business_id`.
-      parameters:
-        - name: restaurantId
-          in: path
-          required: true
-          description: Unique identifier of the restaurant
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  description: New name of the restaurant
-                country:
-                  type: string
-                  description: Country of the restaurant
-                city:
-                  type: string
-                  description: City of the restaurant
-                street:
-                  type: string
-                  description: Street of the restaurant
-                number:
-                  type: string
-                  description: Number of the restaurant
-                postCode:
-                  type: string
-                  description: Post code of the restaurant
-                addressId:
-                  type: string
-                  format: uuid
-                  description: ID of the address' table
-                business_id:
-                  type: string
-                  format: uuid
-                  description: ID of the business the restaurant belongs to
-              anyOf: # Requires at least one field from the following
-                - required:
-                    - name
-                - required:
-                    - country
-                - required:
-                    - city
-                - required:
-                    - street
-                - required:
-                    - number
-                - required:
-                    - postCode
-                - required:
-                    - business_id
-      responses:
-        "200":
-          description: Restaurant edited successfully
-        "400":
-          description: Invalid restaurant data
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
-        "404":
-          description: Original restaurant not found
-        "405":
-          description: Method not supported
-        "422":
-          description: Invalid data
-        "500":
-          description: Internal server error
-
-    delete:
-      tags:
-        - restaurant
-      summary: Delete restaurant from working DB table
-      description: Deletes gift card data from working table and puts old data into RestaurantAudit table with DB triggers.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: restaurantId
-          in: path
-          required: true
-          description: Unique identifier of the restaurant
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "204":
-          description: Restaurant removed successfully
-        "400":
-          description: Invalid request
-        "404":
-          description: Restaurant not found
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission (Only Admin)
-        "405":
-          description: Method not supported
-        "500":
-          description: Internal server error
   /product:
     post:
       tags:
@@ -1814,6 +1289,8 @@ paths:
         - product
       summary: Retrieve a list of products
       description: Fetches a list of products.
+      security:
+        - bearerAuth: []
       parameters:
         - name: resultCount
           in: query
@@ -1942,6 +1419,8 @@ paths:
         - product
       summary: Retrieve a single product by ID
       description: Fetches a product's details based on the provided product ID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: productId
           in: path
@@ -1988,7 +1467,9 @@ paths:
       tags:
         - product
       summary: Update existing product
-      description: Updates existing product and puts old data into ProductAudit table with DB triggers. **Only admin users** can add the `business_id`.
+      description: Updates existing product and puts old data into ProductAudit table with DB triggers.
+      security:
+        - bearerAuth: []
       parameters:
         - name: productId
           in: path
@@ -2079,56 +1560,6 @@ paths:
           description: No permission (Only Admin)
         "405":
           description: Method not supported
-        "500":
-          description: Internal server error
-
-  /product/{productId}/count:
-    put:
-      tags:
-        - product
-      summary: Update product count
-      description: Updates the stock count for an existing product based on the provided product ID. **Only authorized users** can update the count.
-      parameters:
-        - name: productId
-          in: path
-          required: true
-          description: Unique identifier of the product
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                count:
-                  type: integer
-                  description: The new count to be set for the product
-      responses:
-        "200":
-          description: Product count updated successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  productId:
-                    type: string
-                    format: uuid
-                    description: The product ID
-                  count:
-                    type: integer
-                    description: The updated product count
-        "400":
-          description: Invalid request (e.g., invalid count or product ID)
-        "404":
-          description: Product not found
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
         "500":
           description: Internal server error
 
@@ -2292,6 +1723,8 @@ paths:
         - user
       summary: Update existing user
       description: Updates existing user and puts old data into UserAudit table with DB triggers.
+      security:
+        - bearerAuth: []
       parameters:
         - name: userId
           in: path
@@ -2373,6 +1806,8 @@ paths:
 
   /orders:
     post:
+      security:
+        - bearerAuth: []
       tags:
         - order
       summary: Create a new order
@@ -2421,6 +1856,8 @@ paths:
         "500":
           description: Internal server error
     get:
+      security:
+        - bearerAuth: []
       tags:
         - order
       summary: Retrieve a list of orders
@@ -2584,6 +2021,8 @@ paths:
         - order
       summary: Retrieve a single order
       description: Fetches an order based on the provided order ID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: orderId
           in: path
@@ -2665,6 +2104,8 @@ paths:
         - order
       summary: Modify an open order
       description: Modifies the details of an open order.
+      security:
+        - bearerAuth: []
       parameters:
         - name: orderId
           in: path
@@ -2756,6 +2197,8 @@ paths:
       tags:
         - order
       summary: Close an order
+      security:
+        - bearerAuth: []
       description: Closes an order based on the order ID and and puts data into OrderAudit table with DB triggers. Closed orders cannot be modified, but refunds can be processed.
       parameters:
         - name: orderId
@@ -2788,6 +2231,8 @@ paths:
       tags:
         - order
       summary: Cancel an order
+      security:
+        - bearerAuth: []
       description: Cancels an open order based on the provided order ID.
       parameters:
         - name: orderId
@@ -2894,6 +2339,8 @@ paths:
         - productVariation
       summary: Retrieve a list of product variations
       description: Fetches a list of product variations.
+      security:
+        - bearerAuth: []
       parameters:
         - name: resultCount
           in: query
@@ -3017,6 +2464,8 @@ paths:
         - productVariation
       summary: Retrieve a single product variation
       description: Fetches product variation on the provided product variation ID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: productVariationId
           in: path
@@ -3164,6 +2613,8 @@ paths:
     post:
       tags:
         - business
+      security:
+        - bearerAuth: []
       summary: Create a new business
       description: Creates a new business.
       requestBody:
@@ -3171,26 +2622,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                businessCode:
-                  type: string
-                  description: Business code
-                name:
-                  type: string
-                  description: Business name
-                phone:
-                  type: string
-                  description: Business phone number
-                email:
-                  type: string
-                  format: email
-                  description: Business email
-              required:
-                - businessCode
-                - name
-                - phone
-                - email
+              $ref: "#/components/schemas/business"
       responses:
         "201":
           description: Business created successfully
@@ -3202,9 +2634,12 @@ paths:
           description: Invalid data
         "500":
           description: Internal server error
+
     get:
       tags:
         - business
+      security:
+        - bearerAuth: []
       summary: Retrieve a list of businesses
       description: Fetches a list of businesses.
       parameters:
@@ -3293,37 +2728,9 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    businessCode:
-                      type: string
-                      description: Business Code
-                    name:
-                      type: string
-                      description: Name of the business
-                    phone:
-                      type: string
-                      description: Phone number of the business
-                    email:
-                      type: string
-                      format: email
-                      description: Email of the business
-                    createdAt:
-                      type: string
-                      format: date-time
-                      description: Date when business was first created
-                    createdBy:
-                      type: string
-                      format: uuid
-                      description: ID of the employee who created the business
-                    modifiedAt:
-                      type: string
-                      format: date-time
-                      description: Date when business was last modified
-                    modifiedBy:
-                      type: string
-                      format: uuid
-                      description: ID of the employee who last modified the business
+                  allOf:
+                    - $ref: "#/components/schemas/business"
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -3340,6 +2747,8 @@ paths:
       tags:
         - business
       summary: Retrieve a single business by ID
+      security:
+        - bearerAuth: []
       description: Fetches details of a business based on the provided business ID.
       parameters:
         - name: businessId
@@ -3355,37 +2764,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  businessCode:
-                    type: string
-                    description: Business Code
-                  name:
-                    type: string
-                    description: Name of the business
-                  phone:
-                    type: string
-                    description: Phone number of the business
-                  email:
-                    type: string
-                    format: email
-                    description: Email of the business
-                  createdAt:
-                    type: string
-                    format: date-time
-                    description: Date when business was first created
-                  createdBy:
-                    type: string
-                    format: uuid
-                    description: ID of the employee who created the business
-                  modifiedAt:
-                    type: string
-                    format: date-time
-                    description: Date when business was last modified
-                  modifiedBy:
-                    type: string
-                    format: uuid
-                    description: ID of the employee who last modified the business
+                allOf:
+                  - $ref: "#/components/schemas/business"
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -3396,11 +2777,14 @@ paths:
           description: Method not supported
         "500":
           description: Internal server error
+
     put:
       tags:
         - business
       summary: Update existing business
       description: Updates existing business.
+      security:
+        - bearerAuth: []
       parameters:
         - name: businessId
           in: path
@@ -3414,30 +2798,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                businessCode:
-                  type: string
-                  description: Business code
-                name:
-                  type: string
-                  description: Business name
-                phone:
-                  type: string
-                  description: Business phone
-                email:
-                  type: string
-                  format: email
-                  description: Business email
-              anyOf:
-                - required:
-                    - businessCode
-                - required:
-                    - name
-                - required:
-                    - phone
-                - required:
-                    - email
+              $ref: "#/components/schemas/business"
       responses:
         "200":
           description: Business edited successfully
@@ -3455,10 +2816,13 @@ paths:
           description: Invalid data
         "500":
           description: Internal server error
+
     delete:
       tags:
         - business
       summary: Delete business from working DB table
+      security:
+        - bearerAuth: []
       description: Deletes business data from working table.
       parameters:
         - name: businessId
@@ -3490,6 +2854,8 @@ paths:
         - inventory
       summary: Create a new inventory item
       description: Creates a new inventory record.
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -3529,6 +2895,8 @@ paths:
         - inventory
       summary: Retrieve a list of inventory items
       description: Fetches a list of inventory items.
+      security:
+        - bearerAuth: []
       parameters:
         - name: resultCount
           in: query
@@ -3637,6 +3005,8 @@ paths:
       tags:
         - inventory
       summary: Retrieve a specific inventory item by ID
+      security:
+        - bearerAuth: []
       description: Fetches details of an inventory item based on the provided inventory ID.
       parameters:
         - name: inventoryId
@@ -3692,6 +3062,8 @@ paths:
       tags:
         - inventory
       summary: Update existing inventory item
+      security:
+        - bearerAuth: []
       description: Updates an existing inventory item.
       parameters:
         - name: inventoryId
@@ -3745,6 +3117,8 @@ paths:
       tags:
         - inventory
       summary: Delete inventory item
+      security:
+        - bearerAuth: []
       description: Deletes an inventory item from the system.
       parameters:
         - name: inventoryId
@@ -3776,6 +3150,8 @@ paths:
         - sysparams
       summary: Retrieve a list of system parameters items
       description: Fetches a list of system parameters items.
+      security:
+        - bearerAuth: []
       parameters:
         - name: resultCount
           in: query
@@ -3878,6 +3254,8 @@ paths:
         - sysparams
       summary: Retrieve a specific system parameter item by ID
       description: Fetches details of an system parameter item based on the provided ID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: sysparamId
           in: path
@@ -3944,6 +3322,8 @@ paths:
         - sysparams
       summary: Update existing system parameter's value
       description: Updates an existing system parameter's value.
+      security:
+        - bearerAuth: []
       parameters:
         - name: sysparamId
           in: path
@@ -3987,6 +3367,8 @@ paths:
         - tax
       summary: Create a new tax item
       description: Creates a new tax record.
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -4010,6 +3392,8 @@ paths:
         - tax
       summary: Retrieve a list of tax items
       description: Fetches a list of tax items.
+      security:
+        - bearerAuth: []
       parameters:
         - name: resultCount
           in: query
@@ -4090,6 +3474,8 @@ paths:
         - tax
       summary: Retrieve a specific tax item by ID
       description: Fetches details of an tax item based on the provided tax ID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: taxId
           in: path
@@ -4123,6 +3509,8 @@ paths:
         - tax
       summary: Update existing tax item
       description: Updates an existing tax item
+      security:
+        - bearerAuth: []
       parameters:
         - name: taxId
           in: path
@@ -4345,6 +3733,8 @@ paths:
         - customer
       summary: Get a list of customers.
       description: Gets a list of all customer entries in the system.
+      security:
+        - bearerAuth: []
       parameters:
       - name: resultCount
         in: query
@@ -4532,6 +3922,8 @@ paths:
         - productTaxRow
       summary: Retrieve a list of product tax rows
       description: Retrieves a list of product tax rows based on provided criteria.
+      security:
+        - bearerAuth: []
       parameters:
       - name: resultCount
         in: query
@@ -4599,6 +3991,8 @@ paths:
         - productTaxRow
       summary: Retrieve a specific product tax row
       description: Retrieves a product tax row by the specified product tax row iD.
+      security:
+        - bearerAuth: []
       parameters:
         - name: productTaxRowID
           in: path
@@ -4689,6 +4083,8 @@ paths:
         - serviceTaxRow
       summary: Retrieve a list of service tax rows
       description: Retrieves a list of service tax rows based on provided criteria.
+      security:
+        - bearerAuth: []
       parameters:
       - name: resultCount
         in: query
@@ -4756,6 +4152,8 @@ paths:
         - serviceTaxRow
       summary: Retrieve a specific service tax row
       description: Retrieves a service tax row by the specified product tax row iD.
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceTaxRowID
           in: path
@@ -4844,6 +4242,8 @@ paths:
       tags:
         - contactInfo
       summary: Retrieve a list of contact info entries
+      security:
+        - bearerAuth: []
       parameters:
       - name: resultCount
         in: query
@@ -4929,6 +4329,8 @@ paths:
         - contactInfo
       summary: Retrieve a specific contact info item by ID
       description: Fetches details of a contact info item based on the provided contact info ID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: contactInfoID
           in: path
@@ -5095,6 +4497,8 @@ paths:
       tags:
         - service
       summary: Retrieve a list of service entries
+      security:
+        - bearerAuth: []
       parameters:
       - name: resultCount
         in: query
@@ -5174,6 +4578,8 @@ paths:
         - service
       summary: Retrieve a specific service item by ID
       description: Fetches details of a service item based on the provided service ID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceID
           in: path
@@ -5319,6 +4725,8 @@ paths:
       tags:
         - locationBusiness
       summary: Retrieve a list of location business entries
+      security:
+        - bearerAuth: []
       parameters:
         - name: resultCount
           in: query
@@ -5384,6 +4792,8 @@ paths:
         - locationBusiness
       summary: Retrieve a specific location business item by ID
       description: Fetches details of a location business based on the provided locationBusinessID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: locationBusinessID
           in: path
@@ -5523,6 +4933,8 @@ paths:
         tags:
           - productOrderRow
         summary: Retrieve a list of product order rows
+        security:
+          - bearerAuth: []
         parameters:
         - name: resultCount
           in: query
@@ -5597,6 +5009,8 @@ paths:
           - productOrderRow
         summary: Retrieve a specific product order row by ID
         description: Fetches details of a product order row based on the provided ID.
+        security:
+          - bearerAuth: []
         parameters:
           - name: productOrderRowID
             in: path
@@ -5685,6 +5099,8 @@ paths:
       tags:
         - locationProductRow
       summary: Retrieve a list of location product row entries
+      security:
+        - bearerAuth: []
       parameters:
       - name: resultCount
         in: query
@@ -5759,6 +5175,8 @@ paths:
         - locationProductRow
       summary: Retrieve a specific location product row by ID
       description: Fetches details of a location product row based on the provided locationProductRowID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: locationProductRowID
           in: path
@@ -5847,6 +5265,8 @@ paths:
       tags:
         - systemModule
       summary: Retrieve a list of system module entries
+      security:
+        - bearerAuth: []
       parameters:
         - name: resultCount
           in: query
@@ -5900,6 +5320,8 @@ paths:
         - systemModule
       summary: Retrieve a specific system module by ID
       description: Fetches details of a system module based on the provided systemModuleID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: systemModuleID
           in: path
@@ -5988,6 +5410,8 @@ paths:
       tags:
         - userSystemModuleRow
       summary: Retrieve a list of user system module row entries
+      security:
+        - bearerAuth: []
       parameters:
         - name: resultCount
           in: query
@@ -6055,6 +5479,8 @@ paths:
         - userSystemModuleRow
       summary: Retrieve a specific user system module row by ID
       description: Fetches details of a user system module row based on the provided userSystemModuleRowID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: userSystemModuleRowID
           in: path
@@ -6082,7 +5508,6 @@ paths:
           description: Method not supported
         "500":
           description: Internal server error
-
     delete:
       tags:
         - userSystemModuleRow
@@ -6143,6 +5568,8 @@ paths:
       tags:
         - UserType
       summary: Retrieve a list of user type entries
+      security:
+        - bearerAuth: []
       parameters:
         - name: resultCount
           in: query
@@ -6196,6 +5623,8 @@ paths:
         - UserType
       summary: Retrieve a specific user type by ID
       description: Fetches details of a user type based on the provided userTypeID.
+      security:
+        - bearerAuth: []
       parameters:
         - name: userTypeID
           in: path
@@ -6223,6 +5652,48 @@ paths:
           description: Method not supported
         "500":
           description: Internal server error
+
+    put:
+        tags:
+          - UserType
+        summary: Update an existing user type
+        description: Updates the details of a user type based on the provided userTypeID.
+        security:
+          - bearerAuth: []
+        parameters:
+          - name: userTypeID
+            in: path
+            required: true
+            description: Unique identifier of the user type
+            schema:
+              type: string
+              format: uuid
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roleName:
+                    type: string
+                required:
+                  - roleName 
+        responses:
+          "200":
+            description: User type updated successfully
+          "400":
+            description: Invalid request
+          "401":
+            description: Unauthenticated user
+          "403":
+            description: No permission
+          "404":
+            description: User type not found
+          "405":
+            description: Method not supported
+          "500":
+            description: Internal server error
 
     delete:
       tags:
@@ -6284,6 +5755,8 @@ paths:
       tags:
         - customerDiscount
       summary: Retrieve a list of customer discount entries
+      security:
+        - bearerAuth: []
       parameters:
       - name: resultCount
         in: query
@@ -6350,6 +5823,8 @@ paths:
       tags:
         - customerDiscount
       summary: Retrieve a specific customer discount by ID
+      security:
+        - bearerAuth: []
       description: Fetches details of a customer discount based on the provided ID.
       parameters:
         - name: customerDiscountID
@@ -6378,7 +5853,6 @@ paths:
           description: Method not supported
         "500":
           description: Internal server error
-  
     delete:
       tags:
         - customerDiscount
@@ -6829,7 +6303,56 @@ components:
         - currency
         - state
         - paidAt
-
+    giftcard:
+      type: object
+      properties:
+        price:
+          type: string
+        code:
+          type: string
+        validTo:
+          type: string
+          format: date-time
+        businessId:
+          type: string
+          format: uuid
+      required:
+        - price
+        - code
+        - validTo
+        - businessId
+    reservation:
+      type: object
+      properties:
+        reservationId:
+          type: string
+          format: uuid
+        locationId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+      required:
+        - reservationId
+        - locationId
+        - name
+        - startDate
+        - customerId
+    business:
+      type: object
+      properties:
+        businessCode:
+          type: string
+          description: Business code
+        name:
+          type: string
+          description: Business name
+      required:
+        - businessCode
+        - name
   securitySchemes:
     bearerAuth:
       type: http
