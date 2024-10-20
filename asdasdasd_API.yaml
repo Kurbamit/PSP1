@@ -4202,16 +4202,7 @@ paths:
                 items:
                   allOf:
                     - $ref: "#/components/schemas/tax"
-                    - type: object
-                      properties:
-                        createdAt:
-                          type: string
-                          format: date-time
-                          description: Date when the tax item was created
-                        modifiedAt:
-                          type: string
-                          format: date-time
-                          description: Date when the tax item was last modified
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -4245,16 +4236,7 @@ paths:
               schema:
                 allOf:
                   - $ref: "#/components/schemas/tax"
-                  - type: object
-                    properties:
-                      createdAt:
-                        type: string
-                        format: date-time
-                        description: Date when the tax item was created
-                      modifiedAt:
-                        type: string
-                        format: date-time
-                        description: Date when the tax item was last modified
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -4548,20 +4530,7 @@ paths:
                 items:
                   allOf:
                     - $ref: "#/components/schemas/customer"
-                    - type: object
-                      properties:
-                        createdAt:
-                          type: string
-                          format: date-time
-                          description: Date when customer was first created
-                        modifiedAt:
-                          type: string
-                          format: date-time
-                          description: Date when customer was last modified
-                        modifiedBy:
-                          type: string
-                          format: uuid
-                          description: ID of the employee who last modified the customer
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -4742,20 +4711,7 @@ paths:
                 items:
                   allOf:
                     - $ref: "#/components/schemas/productTaxRow"
-                    - type: object
-                      properties:
-                        createdAt:
-                          type: string
-                          format: date-time
-                          description: Date when product tax row was first created
-                        modifiedAt:
-                          type: string
-                          format: date-time
-                          description: Date when product tax row was last modified
-                        modifiedBy:
-                          type: string
-                          format: uuid
-                          description: ID of the employee who last modified the product tax row
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -4789,20 +4745,7 @@ paths:
               schema:
                 allOf:
                   - $ref: "#/components/schemas/productTaxRow"
-                  - type: object
-                    properties:
-                      createdAt:
-                        type: string
-                        format: date-time
-                        description: Date when the inventory item was created
-                      modifiedAt:
-                        type: string
-                        format: date-time
-                        description: Date when the inventory item was last modified
-                      modifiedBy:
-                        type: string
-                        format: uuid
-                        description: ID of the employee who last modified the product tax row
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -4925,20 +4868,7 @@ paths:
                 items:
                   allOf:
                     - $ref: "#/components/schemas/serviceTaxRow"
-                    - type: object
-                      properties:
-                        createdAt:
-                          type: string
-                          format: date-time
-                          description: Date when product tax row was first created
-                        modifiedAt:
-                          type: string
-                          format: date-time
-                          description: Date when product tax row was last modified
-                        modifiedBy:
-                          type: string
-                          format: uuid
-                          description: ID of the employee who last modified the product tax row
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -4972,20 +4902,7 @@ paths:
               schema:
                 allOf:
                   - $ref: "#/components/schemas/serviceTaxRow"
-                  - type: object
-                    properties:
-                      createdAt:
-                        type: string
-                        format: date-time
-                        description: Date when the inventory item was created
-                      modifiedAt:
-                        type: string
-                        format: date-time
-                        description: Date when the inventory item was last modified
-                      modifiedBy:
-                        type: string
-                        format: uuid
-                        description: ID of the employee who last modified the service tax row
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -5124,20 +5041,7 @@ paths:
                 items:
                   allOf:
                     - $ref: "#/components/schemas/contactInfo"
-                    - type: object
-                      properties:
-                        createdAt:
-                          type: string
-                          format: date-time
-                          description: Date when contact info was first created
-                        modifiedAt:
-                          type: string
-                          format: date-time
-                          description: Date when contact info was last modified
-                        modifiedBy:
-                          type: string
-                          format: uuid
-                          description: ID of the employee who last modified the contact info
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -5171,20 +5075,7 @@ paths:
               schema:
                 allOf:
                   - $ref: "#/components/schemas/contactInfo"
-                  - type: object
-                    properties:
-                      createdAt:
-                        type: string
-                        format: date-time
-                        description: Date when the contact info item was created
-                      modifiedAt:
-                        type: string
-                        format: date-time
-                        description: Date when the contact info item was last modified
-                      modifiedBy:
-                        type: string
-                        format: uuid
-                        description: ID of the employee who last modified the contact info
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -5395,20 +5286,7 @@ paths:
                 items:
                   allOf:
                     - $ref: "#/components/schemas/service"
-                    - type: object
-                      properties:
-                        createdAt:
-                          type: string
-                          format: date-time
-                          description: Date when service was first created
-                        modifiedAt:
-                          type: string
-                          format: date-time
-                          description: Date when service was last modified
-                        modifiedBy:
-                          type: string
-                          format: uuid
-                          description: ID of the employee who last modified the service
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -5442,20 +5320,7 @@ paths:
               schema:
                 allOf:
                   - $ref: "#/components/schemas/service"
-                  - type: object
-                    properties:
-                      createdAt:
-                        type: string
-                        format: date-time
-                        description: Date when the service item was created
-                      modifiedAt:
-                        type: string
-                        format: date-time
-                        description: Date when the service item was last modified
-                      modifiedBy:
-                        type: string
-                        format: uuid
-                        description: ID of the employee who last modified the service
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -5631,20 +5496,7 @@ paths:
                 items:
                   allOf:
                     - $ref: "#/components/schemas/locationBusiness"
-                    - type: object
-                      properties:
-                        createdAt:
-                          type: string
-                          format: date-time
-                          description: Date when location business was first created
-                        modifiedAt:
-                          type: string
-                          format: date-time
-                          description: Date when location business was last modified
-                        modifiedBy:
-                          type: string
-                          format: uuid
-                          description: ID of the employee who last modified the location business
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -5678,20 +5530,7 @@ paths:
               schema:
                 allOf:
                   - $ref: "#/components/schemas/locationBusiness"
-                  - type: object
-                    properties:
-                      createdAt:
-                        type: string
-                        format: date-time
-                        description: Date when the location business item was created
-                      modifiedAt:
-                        type: string
-                        format: date-time
-                        description: Date when the location business item was last modified
-                      modifiedBy:
-                        type: string
-                        format: uuid
-                        description: ID of the employee who last modified the location business
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -5870,20 +5709,7 @@ paths:
                   items:
                     allOf:
                       - $ref: "#/components/schemas/productOrderRow"
-                      - type: object
-                        properties:
-                          createdAt:
-                            type: string
-                            format: date-time
-                            description: Date when the product order row was created
-                          modifiedAt:
-                            type: string
-                            format: date-time
-                            description: Date when the product order row was last modified
-                          modifiedBy:
-                            type: string
-                            format: uuid
-                            description: ID of the employee who last modified the product order row
+                      - $ref: "#/components/schemas/AuditInfo"
           "400":
             description: Invalid request
           "401":
@@ -5917,20 +5743,7 @@ paths:
                 schema:
                   allOf:
                     - $ref: "#/components/schemas/productOrderRow"
-                    - type: object
-                      properties:
-                        createdAt:
-                          type: string
-                          format: date-time
-                          description: Date when the product order row was created
-                        modifiedAt:
-                          type: string
-                          format: date-time
-                          description: Date when the product order row was last modified
-                        modifiedBy:
-                          type: string
-                          format: uuid
-                          description: ID of the employee who last modified the product order row
+                    - $ref: "#/components/schemas/AuditInfo"
           "400":
             description: Invalid request
           "401":
@@ -6058,20 +5871,7 @@ paths:
                 items:
                   allOf:
                     - $ref: "#/components/schemas/locationProductRow"
-                    - type: object
-                      properties:
-                        createdAt:
-                          type: string
-                          format: date-time
-                          description: Date when the location product row was first created
-                        modifiedAt:
-                          type: string
-                          format: date-time
-                          description: Date when the location product row was last modified
-                        modifiedBy:
-                          type: string
-                          format: uuid
-                          description: ID of the employee who last modified the location product row
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
@@ -6105,20 +5905,7 @@ paths:
               schema:
                 allOf:
                   - $ref: "#/components/schemas/locationProductRow"
-                  - type: object
-                    properties:
-                      createdAt:
-                        type: string
-                        format: date-time
-                        description: Date when the location product row was created
-                      modifiedAt:
-                        type: string
-                        format: date-time
-                        description: Date when the location product row was last modified
-                      modifiedBy:
-                        type: string
-                        format: uuid
-                        description: ID of the employee who last modified the location product row
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
