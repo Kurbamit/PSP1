@@ -56,7 +56,7 @@ tags:
     description: Operations related to system module
   - name: userSystemModuleRow
     description: Operations related to User SystemModule row
-  - name: customerDiscount
+  - name: customerDiscountRow
     description: Operations related to Customer discounts
 
 paths:
@@ -4974,7 +4974,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: customerDiscountID
+        - name: customerDiscountRowID
           in: query
           description: Filter product order rows by customer discount ID
           required: false
@@ -5726,10 +5726,10 @@ paths:
         "500":
           description: Internal server error
 
-  /customerDiscount:
+  /customerDiscountRow:
     post:
       tags:
-        - customerDiscount
+        - customerDiscountRow
       security:
         - bearerAuth: []
       summary: Create a new customer discount entry
@@ -5738,7 +5738,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/customerDiscount"
+              $ref: "#/components/schemas/customerDiscountRow"
       responses:
         "201":
           description: Customer discount created successfully
@@ -5753,7 +5753,7 @@ paths:
   
     get:
       tags:
-        - customerDiscount
+        - customerDiscountRow
       summary: Retrieve a list of customer discount entries
       security:
         - bearerAuth: []
@@ -5805,7 +5805,7 @@ paths:
                 type: array
                 items:
                   allOf:
-                    - $ref: "#/components/schemas/customerDiscount"
+                    - $ref: "#/components/schemas/customerDiscountRow"
                     - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
@@ -5818,16 +5818,16 @@ paths:
         "500":
           description: Internal server error
   
-  /customerDiscount/{customerDiscountID}:
+  /customerDiscountRow/{customerDiscountRowID}:
     get:
       tags:
-        - customerDiscount
+        - customerDiscountRow
       summary: Retrieve a specific customer discount by ID
       security:
         - bearerAuth: []
       description: Fetches details of a customer discount based on the provided ID.
       parameters:
-        - name: customerDiscountID
+        - name: customerDiscountRowID
           in: path
           required: true
           description: Unique identifier of the customer discount
@@ -5841,7 +5841,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/customerDiscount"
+                  - $ref: "#/components/schemas/customerDiscountRow"
                   - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
@@ -5855,13 +5855,13 @@ paths:
           description: Internal server error
     delete:
       tags:
-        - customerDiscount
+        - customerDiscountRow
       security:
         - bearerAuth: []
       summary: Delete an existing customer discount entry
       description: Deletes a customer discount from the system.
       parameters:
-        - name: customerDiscountID
+        - name: customerDiscountRowID
           in: path
           description: Unique identifier of the customer discount
           required: true
@@ -6119,13 +6119,13 @@ components:
         productId:
           type: string
           format: uuid
-        customerDiscountID:
+        customerDiscountRowID:
           type: string
           format: uuid
       required:
         - orderId
         - productId
-        - customerDiscountID
+        - customerDiscountRowID
     locationProductRow:
       type: object
       properties:
@@ -6222,7 +6222,7 @@ components:
       required:
         - roleName
         - businessId
-    customerDiscount:
+    customerDiscountRow:
       type: object
       properties:
         userID:
