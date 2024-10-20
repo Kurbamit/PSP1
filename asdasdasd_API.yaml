@@ -44,6 +44,8 @@ tags:
     description: Operations related to Product Tax Row
   - name: serviceTaxRow
     description: Operations related to Service Tax Row
+  - name: contactInfo
+    description: Operations related to Contact info
 
 paths:
   /auth/token:
@@ -5139,6 +5141,283 @@ paths:
           description: Method not supported
         "500":
           description: Internal server error
+  
+  /contactInfo:
+    post:
+      tags:
+        - contactInfo
+      security:
+        - bearerAuth: []
+      summary: Create a new contact info entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/contactInfo"
+      responses:
+        "201":
+          description: Contact info created successfully
+        "400":
+          description: Invalid contact info data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+    
+    get:
+      tags:
+        - contactInfo
+      summary: Retrieve a list of contact info entries
+      parameters:
+      - name: resultCount
+        in: query
+        description: Maximum number of items to return
+        required: true
+        schema:
+          type: integer
+      - name: pageIndex
+        in: query
+        description: Page index number
+        required: true
+        schema:
+          type: integer
+      - name: orderingColumn
+        in: query
+        description: Column to order results by
+        required: true
+        schema:
+          type: string
+      - name: orderingDirection
+        in: query
+        description: Ordering direction (0 - asc, 1 - desc)
+        required: true
+        schema:
+          type: integer
+      - name: Country
+        in: query
+        description: Filter contact info by country
+        required: false
+        schema:
+          type: string
+      - name: City
+        in: query
+        description: Filter contact info by city
+        required: false
+        schema:
+          type: string
+      - name: PhoneNumber
+        in: query
+        description: Filter contact info by phone number
+        required: false
+        schema:
+          type: string
+          format: phone
+      - name: Email
+        in: query
+        description: Filter contact info by email
+        required: false
+        schema:
+          type: string
+          format: email
+      - name: PostCode
+        in: query
+        description: Filter contact info by postcode
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A list of contact info retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/contactInfo"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when contact info was first created
+                        modifiedAt:
+                          type: string
+                          format: date-time
+                          description: Date when contact info was last modified
+                        modifiedBy:
+                          type: string
+                          format: uuid
+                          description: ID of the employee who last modified the contact info
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /contactInfo/{contactInfoID}:
+    get:
+      tags:
+        - contactInfo
+      summary: Retrieve a specific contact info item by ID
+      description: Fetches details of a contact info item based on the provided contact info ID.
+      parameters:
+        - name: contactInfoID
+          in: path
+          required: true
+          description: Unique identifier of the contact info item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Contact info item details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/contactInfo"
+                  - type: object
+                    properties:
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date when the contact info item was created
+                      modifiedAt:
+                        type: string
+                        format: date-time
+                        description: Date when the contact info item was last modified
+                      modifiedBy:
+                        type: string
+                        format: uuid
+                        description: ID of the employee who last modified the contact info
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+          
+    put:
+      tags:
+        - contactInfo
+      security:
+        - bearerAuth: []
+      summary: Update an existing customer
+      description: Updates the country, city, street, number, postcode, phone or email of a contact info item.
+      parameters:
+        - name: contactInfoID
+          in: path
+          description: Unique identifier of contact info item.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Country:
+                  type: string
+                  description: New country
+                City:
+                  type: string
+                  description: New city
+                Street:
+                  type: string
+                  description: New street
+                Number:
+                  type: string
+                  description: New street number
+                PostCode:
+                  type: string
+                  description: New post code
+                Phone:
+                  type: string
+                  format: phone
+                  description: New phone number
+                Email:
+                  type: string
+                  format: email
+                  description: New email
+              anyOf:
+                - required:
+                  - Country
+                - required:
+                  - City
+                - required:
+                  - Street
+                - required:
+                  - Number
+                - required:
+                  - PostCode
+                - required:
+                  - Phone
+                - required:
+                  - Email
+      responses:
+        "200":
+          description: Contact info updated successfully
+        "400":
+          description: Invalid request or cotnact info data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Contact info not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+          
+    delete:
+      tags:
+        - contactInfo
+      security:
+        - bearerAuth: []
+      summary: Delete an existing contact info item
+      description: Deletes a contact info item from the system.
+      parameters:
+        - name: contactInfoID
+          in: path
+          description: Unique identifier of the contact info item
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Contact info item deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Contact info not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
 
 components:
   schemas:
@@ -5256,7 +5535,7 @@ components:
       properties:
         Tax:
           type: number
-          format: float
+          format: double
           description: Tax amount
         description:
           type: string
@@ -5283,7 +5562,27 @@ components:
           type: string
           format: uuid
           description: ID of the service
-
+    contactInfo:
+      type: object
+      properties:
+        country:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        number:
+          type: integer
+        postcode:
+          type: string
+        phone:
+          type: string
+          format: phone
+        email:
+          type: string
+          format: email
+        
+    
   securitySchemes:
     bearerAuth:
       type: http
