@@ -1021,66 +1021,39 @@ paths:
         "500":
           description: Internal server error
 
-  /employees:
-    post:
-      tags:
-        - employee
-      summary: Create a new employee
-      description: Creates a new employee and puts data into EmployeeAudit table with DB triggers. **Access restricted to users with admin or manager roles**.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  description: First name of the employee
-                surname:
-                  type: string
-                  description: Last name of the employee
-                userTypeEnum:
-                  type: integer
-                  description: User type enum from UserTypeEnum
-                location_business_id:
-                  type: string
-                  format: uuid
-                  description: ID of the business' location
-              required:
-                - name
-                - surname
-                - userTypeEnum
-                - location_business_id
-      responses:
-        "201":
-          description: Employee created successfully
-        "400":
-          description: Invalid employee data
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission (Only admin and Manager)
-        "405":
-          description: Method not supported
-        "422":
-          description: Invalid data
-        "500":
-          description: Internal server error
-
-    get:
-      tags:
-        - employee
-      summary: Retrieve a list of employees that currently working
-      description: Fetches a list of employees. **Access restricted to users with admin or manager roles**.
-      security:
-        - bearerAuth: []
-      parameters:
+  /employee:
+      post:
+        tags:
+          - employee
+        security:
+          - bearerAuth: []
+        summary: Create a new employee entry
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/employee"
+        responses:
+          "201":
+            description: Employee created successfully
+          "400":
+            description: Invalid employee data
+          "405":
+            description: Method not supported
+          "422":
+            description: Invalid data
+          "500":
+            description: Internal server error
+      
+      get:
+        tags:
+          - employee
+        summary: Retrieve a list of employee entries
+        parameters:
         - name: resultCount
           in: query
-          description: Maximum length of returned list
+          description: Maximum number of items to return
           required: true
           schema:
             type: integer
@@ -1092,7 +1065,7 @@ paths:
             type: integer
         - name: orderingColumn
           in: query
-          description: Ordering column name
+          description: Column to order results by
           required: true
           schema:
             type: string
@@ -1102,118 +1075,65 @@ paths:
           required: true
           schema:
             type: integer
+        - name: locationBusinessID
+          in: query
+          description: Filter employees by location business ID
+          required: false
+          schema:
+            type: string
+            format: uuid
         - name: name
           in: query
-          description: Filter employees by their first name
+          description: Filter employees by name
           required: false
           schema:
             type: string
         - name: surname
           in: query
-          description: Filter employees by their last name
+          description: Filter employees by surname
           required: false
           schema:
             type: string
-        - name: userTypeEnum
+        - name: salary
           in: query
-          description: Filter employees by their user type enum
+          description: Filter employees by salary
           required: false
           schema:
-            type: integer
-        - name: businessId
-          in: query
-          description: Filter employees by business ID
-          required: false
-          schema:
-            type: string
-            format: uuid
-        - name: locationBusinessId
-          in: query
-          description: Filter employees by business' location ID
-          schema:
-            type: string
-            format: uuid
-        - name: userType
-          in: query
-          description: User type enum value
-          required: false
-          schema:
-            type: integer
-        - name: workingFromFrom
-          in: query
-          description: Filter out by date (working from (from date))
-          required: false
-          schema:
-            type: string
-            format: date
-        - name: workingFromTo
-          in: query
-          description: Filter out by date (working from (to date))
-          required: false
-          schema:
-            type: string
-            format: date
-        - name: email
-          in: query
-          description: Filter out by email
-          required: false
-          schema:
-            type: string
-            format: email
-      responses:
-        "200":
-          description: A list of employees retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      description: Unique ID of the employee
-                    name:
-                      type: string
-                      description: First name of the employee
-                    surname:
-                      type: string
-                      description: Last name of the employee
-                    userTypeEnum:
-                      type: integer
-                      description: User type enum from UserTypeEnum
-                    business_id:
-                      type: string
-                      format: uuid
-                      description: ID of the business the employee belongs to
-                    location_business_id:
-                      type: string
-                      format: uuid
-                      description: ID of the business' location
-        "400":
-          description: Invalid request
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission (Only admin and Manager)
-        "405":
-          description: Method not supported
-        "500":
-          description: Internal server error
-
-  /employees/{employeeId}:
+            type: number
+            format: double
+        responses:
+          "200":
+            description: A list of employee entries retrieved successfully
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    allOf:
+                      - $ref: "#/components/schemas/employee"
+                      - $ref: "#/components/schemas/AuditInfo"
+          "400":
+            description: Invalid request
+          "401":
+            description: Unauthenticated user
+          "403":
+            description: No permission
+          "405":
+            description: Method not supported
+          "500":
+            description: Internal server error
+  
+  /employee/{employeeID}:
     get:
       tags:
         - employee
-      summary: Retrieve a single employee by ID
-      description: Fetches an employee's details based on the provided employee ID. **Access restricted to users with admin or manager roles**.
-      security:
-        - bearerAuth: []
+      summary: Retrieve a specific employee item by ID
+      description: Fetches details of an employee item based on the provided employee ID.
       parameters:
-        - name: employeeId
+        - name: employeeID
           in: path
           required: true
-          description: Unique identifier of the employee
+          description: Unique identifier of the employee item
           schema:
             type: string
             format: uuid
@@ -1223,64 +1143,32 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    description: Unique ID of the employee
-                  name:
-                    type: string
-                    description: First name of the employee
-                  surname:
-                    type: string
-                    description: Last name of the employee
-                  userTypeEnum:
-                    type: integer
-                    description: User type enum from UserTypeEnum
-                  createdAt:
-                    type: string
-                    format: date-time
-                    description: Created at date and time
-                  userName:
-                    type: string
-                    description: Employee's user name
-                  userId:
-                    type: string
-                    format: uuid
-                    description: Employee's user Id for navigation
-                  business_id:
-                    type: string
-                    format: uuid
-                    description: ID of the business the employee belongs to
-                  location_business_id:
-                    type: string
-                    format: uuid
-                    description: ID of the business' location
+                allOf:
+                  - $ref: "#/components/schemas/employee"
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
-        "404":
-          description: Employee not found
         "401":
           description: Unauthenticated user
         "403":
-          description: No permission (Only admin and Manager)
+          description: No permission
         "405":
           description: Method not supported
         "500":
           description: Internal server error
-
+          
     put:
       tags:
         - employee
-      summary: Update existing employee
-      description: Updates existing employee and puts old data into EmployeeAudit table with DB triggers. **Access restricted to users with admin or manager roles**. **Only admin users** can add the `business_id`, **Only admin or manager users** can add the `location_business_id`.
       security:
         - bearerAuth: []
+      summary: Update an existing employee
+      description: Updates the name, surname, or salary of an existing employee
       parameters:
-        - name: employeeId
+        - name: employeeID
           in: path
+          description: Unique identifier of the employee item.
           required: true
-          description: Unique identifier of the employee
           schema:
             type: string
             format: uuid
@@ -1293,75 +1181,65 @@ paths:
               properties:
                 name:
                   type: string
-                  description: First name of the employee
+                  description: New name of the employee
                 surname:
                   type: string
-                  description: Last name of the employee
-                userTypeEnum:
-                  type: integer
-                  description: User type enum from UserTypeEnum
-                business_id:
-                  type: string
-                  format: uuid
-                  description: ID of the business the employee belongs to
-                location_business_id:
-                  type: string
-                  format: uuid
-                  description: ID of the business' location
-              anyOf: # At least one field from the list must be present
+                  description: New surname of the employee
+                salary:
+                  type: number
+                  format: double
+                  description: New salary of the employee
+              anyOf:
                 - required:
-                    - name
+                  - name
                 - required:
-                    - surname
+                  - surname
                 - required:
-                    - userTypeEnum
-                - required:
-                    - business_id
-                - required:
-                    - location_business_id
+                  - salary
       responses:
         "200":
-          description: Employee edited successfully
+          description: Employee updated successfully
         "400":
-          description: Invalid employee data
+          description: Invalid request or employee data
         "401":
           description: Unauthenticated user
         "403":
-          description: No permission (Only admin and Manager)
+          description: No permission
         "404":
-          description: Original employee not found
+          description: Employee not found
         "405":
           description: Method not supported
         "422":
           description: Invalid data
         "500":
           description: Internal server error
-
+          
     delete:
       tags:
         - employee
-      summary: Delete employee from working DB table
-      description: Deletes employee data from working table and puts old data into EmployeeAudit table with DB triggers. **Access restricted to users with admin or manager roles**.
       security:
         - bearerAuth: []
+      summary: Delete an existing employee item
+      description: Deletes an employee item from the system.
       parameters:
-        - name: employeeId
+        - name: employeeID
           in: path
+          description: Unique identifier of the employee item
           required: true
-          description: Unique identifier of the employee
           schema:
             type: string
+            format: uuid
       responses:
         "204":
-          description: Employee removed successfully
+          description: Employee item deleted successfully
         "400":
           description: Invalid request
-        "404":
-          description: Employee not found
         "401":
           description: Unauthenticated user
         "403":
-          description: No permission (Only admin and Manager)
+          description: No permission
+        "404":
+          description: Employee not found
         "405":
           description: Method not supported
         "500":
@@ -6502,6 +6380,44 @@ components:
         locationBusinessID:
           type: string
           format: uuid
+    employee:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        salary:
+          type: number
+          format: double
+        userTypeID:
+          type: string
+          format: uuid
+        userID:
+          type: string
+          format: uuid
+        locationBusinessID:
+          type: string
+          format: uuid
+    AuditInfo:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+          description: Date when the record was first created
+        modifiedAt:
+          type: string
+          format: date-time
+          description: Date when the record was last modified
+        modifiedBy:
+          type: string
+          format: uuid
+          description: ID of the employee who last modified the record
+        createdBy:
+          type: string
+          format: uuid
+          description: ID of the employee who created the record
     
   securitySchemes:
     bearerAuth:
