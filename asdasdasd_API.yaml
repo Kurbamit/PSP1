@@ -539,71 +539,39 @@ paths:
           description: Internal server error
 
 
-  /reservations:
+  /reservation:
     post:
       tags:
         - reservation
-      summary: Create a new reservation
-      description: Creates a new reservation.
       security:
         - bearerAuth: []
+      summary: Create a new reservation entry
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                reservationId:
-                  type: string
-                  format: uuid
-                restaurantId:
-                  type: string
-                  format: uuid
-                name:
-                  type: string
-                guestNumber:
-                  type: integer
-                  description: Number of the guests
-                  example: 1
-                reservationState:
-                  type: string
-                  enum:
-                    - active
-                    - cancelled
-                    - completed
-                startDate:
-                  type: string
-                  format: date-time
-                endDate:
-                  type: string
-                  format: date-time
-                createdBy:
-                  type: string
-                  format: uuid
+              $ref: "#/components/schemas/reservation"
       responses:
         "201":
           description: Reservation created successfully
         "400":
-          description: Invalid input
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
+          description: Invalid reservation data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
         "500":
           description: Internal server error
-
+  
     get:
       tags:
         - reservation
-      summary: Retrieve a list of reservations
-      description: Fetches a list of reservations.
-      security:
-        - bearerAuth: []
+      summary: Retrieve a list of reservation entries
       parameters:
         - name: resultCount
           in: query
-          description: Maximum length of returned list
+          description: Maximum number of items to return
           required: true
           schema:
             type: integer
@@ -615,7 +583,7 @@ paths:
             type: integer
         - name: orderingColumn
           in: query
-          description: Ordering column name
+          description: Column to order results by
           required: true
           schema:
             type: string
@@ -625,161 +593,111 @@ paths:
           required: true
           schema:
             type: integer
+        - name: locationID
+          in: query
+          description: Filter reservations by location
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: employeeID
+          in: query
+          description: Filter reservations by employee
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: customerID
+          in: query
+          description: Filter reservations by customer
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: serviceID
+          in: query
+          description: Filter reservations by service
+          required: false
+          schema:
+            type: string
+            format: uuid
         - name: reservationState
           in: query
-          description: Filter reservations by their state.
+          description: Filter reservations by state
           required: false
           schema:
             type: string
             enum:
-              - active
-              - cancelled
-              - completed
-        - name: startDate
-          in: query
-          description: Filter reservations created on or after this date.
-          required: false
-          schema:
-            type: string
-            format: date
-        - name: endDate
-          in: query
-          description: Filter reservations created on or before this date.
-          required: false
-          schema:
-            type: string
-            format: date
+              - Active
+              - Cancelled
+              - Completed
       responses:
         "200":
-          description: A list of reservations retrieved successfully
+          description: A list of reservation info retrieved successfully
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    reservationId:
-                      type: string
-                      format: uuid
-                    restaurantId:
-                      type: string
-                      format: uuid
-                    name:
-                      type: string
-                    reservationState:
-                      type: string
-                      enum:
-                        - active
-                        - cancelled
-                        - completed
-                      example: "confirmed"
-                    startDate:
-                      type: string
-                      format: date-time
-                    endDate:
-                      type: string
-                      format: date-time
-                    createdAt:
-                      type: string
-                      format: date-time
-                    createdBy:
-                      type: string
-                      format: uuid
-                      description: The employee who created the reservation
+                  allOf:
+                    - $ref: "#/components/schemas/reservation"
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
         "401":
           description: Unauthenticated user
         "403":
           description: No permission
+        "405":
+          description: Method not supported
         "500":
           description: Internal server error
-
-  /reservations/{reservationId}:
+  
+  /reservation/{reservationID}:
     get:
       tags:
         - reservation
-      summary: Retrieve a single reservation by ID
-      description: Fetches a reservation’s details based on the provided reservation ID.
-      security:
-        - bearerAuth: []
+      summary: Retrieve a specific reservation item by ID
+      description: Fetches details of a reservation item based on the provided reservation ID.
       parameters:
-        - name: reservationId
+        - name: reservationID
           in: path
-          description: Unique identifier of the reservation
           required: true
+          description: Unique identifier of the reservation item
           schema:
             type: string
             format: uuid
       responses:
         "200":
-          description: Reservation details retrieved successfully
+          description: Reservation item details retrieved successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  reservationId:
-                    type: string
-                    format: uuid
-                  restaurantId:
-                    type: string
-                    format: uuid
-                  guestNumber:
-                    type: integer
-                    description: Number of the guests
-                  name:
-                    type: string
-                  reservationState:
-                    type: string
-                    enum:
-                      - active
-                      - cancelled
-                      - completed
-                    example: "confirmed"
-                  startDate:
-                    type: string
-                    format: date-time
-                  endDate:
-                    type: string
-                    format: date-time
-                  createdAt:
-                    type: string
-                    format: date-time
-                  createdBy:
-                    type: string
-                    format: uuid
-                    description: The employee who created the reservation
-                  modifiedAt:
-                    type: string
-                    format: date-time
-                  modifiedBy:
-                    type: string
-                    format: uuid
-                    description: The employee who modified the reservation
+                allOf:
+                  - $ref: "#/components/schemas/reservation"
+                  - $ref: "#/components/schemas/AuditInfo"
         "400":
-          description: Invalid reservation ID
+          description: Invalid request
         "401":
           description: Unauthenticated user
         "403":
           description: No permission
-        "404":
-          description: Reservation not found
+        "405":
+          description: Method not supported
         "500":
           description: Internal server error
-
+  
     put:
       tags:
         - reservation
-      summary: Update a reservation
-      description: Updates a reservation's details.
       security:
         - bearerAuth: []
+      summary: Update an existing reservation
+      description: Updates the name, date, or state of an existing reservation
       parameters:
-        - name: reservationId
+        - name: reservationID
           in: path
-          description: Unique identifier of the reservation
+          description: Unique identifier of reservation item.
           required: true
           schema:
             type: string
@@ -791,79 +709,77 @@ paths:
             schema:
               type: object
               properties:
-                reservationId:
-                  type: string
-                restaurantId:
-                  type: string
-                  format: uuid
                 name:
                   type: string
+                  description: New name
+                date:
+                  type: string
+                  format: date-time
+                  description: New reservation date
                 reservationState:
                   type: string
                   enum:
-                    - active
-                    - cancelled
-                    - completed
-                startDate:
-                  type: string
-                  format: date-time
-                endDate:
-                  type: string
-                  format: date-time
-                guestCount:
-                  type: integer
-                  description: Number of the guests
-                modifiedAt:
-                  type: string
-                  format: date-time
-                modifiedBy:
-                  type: string
-                  format: uuid
-                  description: The employee who modified the reservation
+                    - Active
+                    - Cancelled
+                    - Completed
+                  description: New reservation state
+              anyOf:
+                - required:
+                  - name
+                - required:
+                  - date
+                - required:
+                  - reservationState
       responses:
         "200":
           description: Reservation updated successfully
         "400":
-          description: Invalid input
+          description: Invalid request or reservation data
         "401":
           description: Unauthenticated user
         "403":
           description: No permission
         "404":
-          description: Reservation not found
+          description: Reservation info not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
         "500":
           description: Internal server error
-
+  
     delete:
       tags:
         - reservation
-      summary: Delete a reservation
-      description: Deletes a reservation based on the provided reservation ID. **Only admin users can delete reservations**.
       security:
         - bearerAuth: []
+      summary: Delete an existing reservation item
+      description: Deletes a reservation item from the system.
       parameters:
-        - name: reservationId
+        - name: reservationID
           in: path
-          description: Unique identifier of the reservation
+          description: Unique identifier of the reservation item
           required: true
           schema:
             type: string
             format: uuid
       responses:
         "204":
-          description: Reservation deleted successfully
+          description: Reservation item deleted successfully
         "400":
-          description: Invalid reservation ID
+          description: Invalid request
         "401":
           description: Unauthenticated user
         "403":
           description: No permission
         "404":
           description: Reservation not found
+        "405":
+          description: Method not supported
         "500":
           description: Internal server error
 
-  /reservations/cancel/{reservationId}:
+  /reservation/cancel/{reservationId}:
     post:
       tags:
         - reservation
@@ -6829,7 +6745,32 @@ components:
         - currency
         - state
         - paidAt
-
+    reservation:
+      type: object
+      properties:
+        locationID:
+          type: string
+          format: uuid
+        name:
+          type: string
+        date:
+          type: string
+          format: date-time
+        reservationState:
+          type: string
+          enum:
+            - Active
+            - Cancelled
+            - Completed
+        employeeID:
+          type: string
+          format: uuid
+        customerID:
+          type: string
+          format: uuid
+        serviceID:
+          type: string
+          format: uuid
   securitySchemes:
     bearerAuth:
       type: http
