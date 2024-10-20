@@ -56,6 +56,8 @@ tags:
     description: Operations related to User SystemModule row
   - name: customerDiscountRow
     description: Operations related to Customer discounts
+  - name: eventTime
+    description: Operations related to event time
 
 paths:
   /auth/token:
@@ -731,36 +733,6 @@ paths:
       responses:
         "204":
           description: Reservation deleted successfully
-        "400":
-          description: Invalid reservation ID
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
-        "404":
-          description: Reservation not found
-        "500":
-          description: Internal server error
-
-  /reservations/cancel/{reservationId}:
-    post:
-      tags:
-        - reservation
-      summary: Cancel a reservation
-      description: Cancels a reservation based on the provided reservation ID.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: reservationId
-          in: path
-          description: Unique identifier of the reservation
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "204":
-          description: Reservation cancelled successfully
         "400":
           description: Invalid reservation ID
         "401":
@@ -5491,6 +5463,196 @@ paths:
         "500":
           description: Internal server error
 
+  /eventTime:
+    post:
+      tags:
+        - eventTime
+      security:
+        - bearerAuth: []
+      summary: Create a new event time entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/eventTime"
+      responses:
+        "201":
+          description: Event time created successfully
+        "400":
+          description: Invalid event time data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+  
+    get:
+      tags:
+        - eventTime
+      summary: Retrieve a list of event time entries
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Column to order results by
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of event times retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                  - $ref: "#/components/schemas/eventTime"
+                  - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+  /eventTime/{eventTimeID}:
+    get:
+      tags:
+        - eventTime
+      summary: Retrieve a specific event time entry by ID
+      description: Fetches details of an event time based on the provided event time ID.
+      parameters:
+        - name: eventTimeID
+          in: path
+          required: true
+          description: Unique identifier of the event time entry
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Event time details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/eventTime"
+                  - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+    put:
+      tags:
+        - eventTime
+      security:
+        - bearerAuth: []
+      summary: Update an existing event time
+      description: Updates the valid from and valid to times of an existing event time
+      parameters:
+        - name: eventTimeID
+          in: path
+          description: Unique identifier of event time entry.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                validFrom:
+                  type: string
+                  description: New valid from time
+                validTo:
+                  type: string
+                  description: New valid to time
+              required:
+                - validFrom
+                - validTo
+      responses:
+        "200":
+          description: Event time updated successfully
+        "400":
+          description: Invalid request or event time data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Event time info not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+  
+    delete:
+      tags:
+        - eventTime
+      security:
+        - bearerAuth: []
+      summary: Delete an existing event time entry
+      description: Deletes an event time entry from the system.
+      parameters:
+        - name: eventTimeID
+          in: path
+          description: Unique identifier of the event time entry
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Event time entry deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Event time not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
           
 components:
   schemas:
@@ -5974,6 +6136,16 @@ components:
         - customerDiscountID
         - userID
         - locationBusinessID
+    eventTime:
+      type: object
+      properties:
+        validFrom:
+          type: string
+        validTo:
+          type: string
+      required:
+        - validFrom
+        - validTo
   securitySchemes:
     bearerAuth:
       type: http
