@@ -34,8 +34,6 @@ tags:
     description: Operations related to System parameters
   - name: tax
     description: Operations related to Taxes
-  - name: locationProduct
-    description: Operations related to Location product
   - name: customer
     description: Operations related to Customers
   - name: productTaxRow
@@ -1797,68 +1795,39 @@ paths:
         "500":
           description: Internal server error
 
-  /orders:
+  /order:
     post:
-      security:
-        - bearerAuth: []
       tags:
         - order
-      summary: Create a new order
-      description: Creates a new order.
+      security:
+        - bearerAuth: []
+      summary: Create a new order entry
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                orderItems:
-                  type: array
-                  description: List of items in the order
-                  items:
-                    type: object
-                    properties:
-                      productId:
-                        type: string
-                        description: ID of the product
-                      quantity:
-                        type: integer
-                        description: Quantity of the product
-                discountId:
-                  type: string
-                  description: Optional discount applied to the order
-                tip:
-                  type: number
-                  format: decimal
-                  description: Optional tip added by the customer
-                businessId:
-                  type: string
-                  format: uuid
-                  description: ID of the bussines
-                locationBusinessId:
-                  type: string
-                  format: uuid
-                  description: ID of the business' location
-              required:
-                - orderItems
+              $ref: "#/components/schemas/order"
       responses:
         "201":
           description: Order created successfully
         "400":
-          description: Invalid input data
+          description: Invalid order data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
         "500":
           description: Internal server error
+  
     get:
-      security:
-        - bearerAuth: []
       tags:
         - order
-      summary: Retrieve a list of orders
-      description: Fetches a list of orders.
+      summary: Retrieve a list of order entries
       parameters:
         - name: resultCount
           in: query
-          description: Maximum length of returned list
+          description: Maximum number of items to return
           required: true
           schema:
             type: integer
@@ -1870,7 +1839,7 @@ paths:
             type: integer
         - name: orderingColumn
           in: query
-          description: Ordering column name
+          description: Column to order results by
           required: true
           schema:
             type: string
@@ -1880,205 +1849,51 @@ paths:
           required: true
           schema:
             type: integer
-        - name: price
+        - name: locationBusinessID
           in: query
-          description: Filter orders by their price
-          required: false
-          schema:
-            type: string
-        - name: createdAt
-          in: query
-          description: Filter orders by their creation date
-          required: false
-          schema:
-            type: string
-            format: date
-        - name: modifiedAt
-          in: query
-          description: Filter orders by their modification date
-          required: false
-          schema:
-            type: string
-            format: date
-        - name: modifiedBy
-          in: query
-          description: Filter orders by the ID of the employee who modified the orders
+          description: Filter orders by business location
           required: false
           schema:
             type: string
             format: uuid
-        - name: createdBy
+        - name: userID
           in: query
-          description: Filter orders by the ID of the order creator
+          description: Filter orders by user
           required: false
           schema:
             type: string
             format: uuid
-        - name: businessId
+        - name: customerDiscountID
           in: query
-          description: Filter orders by business ID
-          required: false
-          schema:
-            type: string
-            format: uuid
-        - name: locationBusinessId
-          in: query
-          description: Filter orders by business' location ID
+          description: Filter orders by customer discount
           required: false
           schema:
             type: string
             format: uuid
         - name: orderStatus
           in: query
-          description: Filter orders by their order status enum value
+          description: Filter orders by status
           required: false
           schema:
-            type: integer
+            type: string
+            enum:
+              - Open
+              - Closed
+              - Cancelled
+              - Refunded
       responses:
         "200":
-          description: A list of orders retrieved successfully
+          description: A list of order info retrieved successfully
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      format: uuid
-                      description: Unique ID of the order
-                    price:
-                      type: string
-                      description: Price of the order
-                    OrderStatusEnum:
-                      type: string
-                      enum: [Open, Closed, Cancelled, Refunded]
-                      description: Order type enum from OrderStatusEnum
-                    createdAt:
-                      type: string
-                      format: date
-                      description: Order creation date
-                    modifiedAt:
-                      type: string
-                      format: date
-                      description: Order modification date
-                    modifiedBy:
-                      type: string
-                      format: uuid
-                      description: ID of the employee who modified the order
-                    createdBy:
-                      type: string
-                      format: uuid
-                      description: ID of the employee who created the order
-                    businessId:
-                      type: string
-                      format: uuid
-                    locationBusinessId:
-                      type: string
-                      format: uuid
-                    orderItems:
-                      type: array
-                      description: List of items in the order
-                      items:
-                        type: object
-                        properties:
-                          productId:
-                            type: string
-                            description: Product ID
-                          quantity:
-                            type: integer
-                            description: Quantity of the product
-                    discountId:
-                      type: string
-                      format: uuid
-                      description: Optional discount applied to the order
-                    tip:
-                      type: string
-                      description: Optional tip added by the customer
+                  allOf:
+                    - $ref: "#/components/schemas/order"
+                    - $ref: "#/components/schemas/AuditInfo"
         "400":
           description: Invalid request
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
-        "500":
-          description: Internal server error
-
-  /orders/{orderId}:
-    get:
-      tags:
-        - order
-      summary: Retrieve a single order
-      description: Fetches an order based on the provided order ID.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: orderId
-          in: path
-          required: true
-          description: Unique identifier of the order
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: The order retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    description: Unique ID of the order
-                  price:
-                    type: string
-                    description: Price of the order
-                  createdAt:
-                    type: string
-                    format: date
-                    description: Order creation date
-                  modifiedAt:
-                    type: string
-                    format: date
-                    description: Order modification date
-                  modifiedBy:
-                    type: string
-                    format: uuid
-                    description: ID of the employee who modified the order
-                  createdBy:
-                    type: string
-                    format: uuid
-                    description: ID of the employee who created the order
-                  businessId:
-                    type: string
-                    format: uuid
-                  locationBusinessId:
-                    type: string
-                    format: uuid
-                  OrderStatusEnum:
-                    type: string
-                    enum: [Open, Closed, Cancelled, Refunded]
-                    description: Order type enum from OrderStatusEnum
-                  orderItems:
-                    type: array
-                    description: List of items in the order
-                    items:
-                      type: object
-                      properties:
-                        productId:
-                          type: string
-                          format: uuid
-                          description: Product ID
-                        quantity:
-                          type: integer
-                          description: Quantity of the product
-        "400":
-          description: Invalid request
-        "404":
-          description: Order not found
         "401":
           description: Unauthenticated user
         "403":
@@ -2087,22 +1902,56 @@ paths:
           description: Method not supported
         "500":
           description: Internal server error
-
+  
+  /order/{orderID}:
+    get:
+      tags:
+        - order
+      summary: Retrieve a specific order item by ID
+      description: Fetches details of an order item based on the provided order ID.
+      parameters:
+        - name: orderID
+          in: path
+          required: true
+          description: Unique identifier of the order item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Order item details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/order"
+                  - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
     put:
       tags:
         - order
-      summary: Modify an open order
-      description: Modifies the details of an open order.
       security:
         - bearerAuth: []
+      summary: Update an existing order
+      description: Updates the price, order status, or tip of an existing order
       parameters:
-        - name: orderId
+        - name: orderID
           in: path
+          description: Unique identifier of order item.
           required: true
           schema:
             type: string
             format: uuid
-            description: ID of the order
       requestBody:
         required: true
         content:
@@ -2110,97 +1959,65 @@ paths:
             schema:
               type: object
               properties:
-                orderItems:
-                  type: array
-                  description: List of items in the order
-                  items:
-                    type: object
-                    properties:
-                      ProductId:
-                        type: string
-                        description: ID of the product
-                      quantity:
-                        type: integer
-                        description: Quantity of the product
-                discountId:
+                price:
                   type: string
-                  format: uuid
-                  description: Optional discount applied to the order
+                  description: New price of the order
+                orderStatus:
+                  type: string
+                  enum:
+                    - Open
+                    - Closed
+                    - Cancelled
+                    - Refunded
+                  description: New order status
                 tip:
                   type: string
-                  description: Optional tip added by the customer
-                businessId:
-                  type: string
-                  format: uuid
-                locationBusinessId:
-                  type: string
-                  format: uuid
+                  description: New tip for the order
               anyOf:
                 - required:
-                    - orderItems
+                  - price
                 - required:
-                    - discountId
+                  - orderStatus
                 - required:
-                    - tip
-                - required:
-                    - businessId
-                - required:
-                    - locationBusinessId
+                  - tip
       responses:
         "200":
           description: Order updated successfully
         "400":
-          description: Invalid input or order status not open
+          description: Invalid request or order data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
         "404":
-          description: Order not found
+          description: Order info not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
         "500":
           description: Internal server error
-
+  
     delete:
       tags:
         - order
-      summary: Delete an order
-      description: Deletes order with the specified ID. Open orders cannot be deleted.
       security:
         - bearerAuth: []
+      summary: Delete an existing order item
+      description: Deletes an order item from the system.
       parameters:
-        - name: orderId
+        - name: orderID
           in: path
+          description: Unique identifier of the order item
           required: true
-          schema:
-            type: string
-            description: The ID of the order
-      responses:
-        "200":
-          description: Order deleted successfully
-        "400":
-          description: Order is status is open
-        "404":
-          description: Order not found
-        "500":
-          description: Internal server error
-
-  /orders/close/{orderId}:
-    put:
-      tags:
-        - order
-      summary: Close an order
-      security:
-        - bearerAuth: []
-      description: Closes an order based on the order ID and and puts data into OrderAudit table with DB triggers. Closed orders cannot be modified, but refunds can be processed.
-      parameters:
-        - name: orderId
-          in: path
-          required: true
-          description: Unique identifier of the order
           schema:
             type: string
             format: uuid
       responses:
-        "200":
-          description: Order closed successfully
+        "204":
+          description: Order item deleted successfully
         "400":
-          description: Invalid orderId
+          description: Invalid request
         "401":
           description: Unauthenticated user
         "403":
@@ -2209,78 +2026,9 @@ paths:
           description: Order not found
         "405":
           description: Method not supported
-        "422":
-          description: Invalid data
         "500":
           description: Internal server error
 
-  /orders/cancel/{orderId}:
-    put:
-      tags:
-        - order
-      summary: Cancel an order
-      security:
-        - bearerAuth: []
-      description: Cancels an open order based on the provided order ID.
-      parameters:
-        - name: orderId
-          in: path
-          required: true
-          description: Unique identifier of the order
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: Order cancelled successfully
-        "400":
-          description: Invalid orderId
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
-        "404":
-          description: Order not found
-        "405":
-          description: Method not supported
-        "422":
-          description: Invalid data
-        "500":
-          description: Internal server error
-
-  /orders/refund/{orderId}:
-    put:
-      tags:
-        - order
-      summary: Refund an order
-      description: Refunds the specified order and puts order data into OrderAudit table with DB triggers. Only closed orders can be refunded.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: orderId
-          in: path
-          required: true
-          description: Unique identifier of the order
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: Order refunded successfully
-        "400":
-          description: Invalid orderId
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
-        "404":
-          description: Order not found
-        "405":
-          description: Method not supported
-        "422":
-          description: Invalid data
-        "500":
-          description: Internal server error
 
   /productVariation:
     post:
@@ -3554,127 +3302,6 @@ paths:
           description: Invalid request
         "404":
           description: Tax item not found
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission (Only Admin)
-        "405":
-          description: Method not supported
-        "500":
-          description: Internal server error
-  
-  /locationProduct:
-    post:
-      summary: Create a location product
-      tags:
-        - locationProduct
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/locationProduct'
-      responses:
-        "201":
-          description: Location product created successfully
-        "400":
-          description: Invalid request
-    get:
-      tags:
-        - locationProduct
-      security:
-        - bearerAuth: []
-      summary: Retrieve a list of location products.
-      description: Fetches a list of location products.
-      parameters:
-        - name: resultCount
-          in: query
-          description: Maximum number of items to return
-          required: true
-          schema:
-            type: integer
-        - name: pageIndex
-          in: query
-          description: Page index number
-          required: true
-          schema:
-            type: integer
-        - name: orderingColumn
-          in: query
-          description: Column to order results by
-          required: true
-          schema:
-            type: string
-        - name: orderingDirection
-          in: query
-          description: Ordering direction (0 - asc, 1 - desc)
-          required: true
-          schema:
-            type: integer
-        - name: ProductId
-          in: query
-          description: Filter location products by product ID
-          required: false
-          schema:
-            type: string
-            format: uuid
-        - name: ProductVariationID
-          in: query
-          description: Filter location products by product variation ID
-          required: false
-          schema:
-            type: string
-            format: uuid
-        - name: LocationBusinessID
-          in: query
-          description: Filter location products by location business ID
-          required: false
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: A list of location products retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/locationProduct'
-        "400":
-          description: Invalid request
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
-        "405":
-          description: Method not supported
-        "500":
-          description: Internal server error
-  
-  /locationProduct/{locationProductID}:
-    delete:
-      tags:
-        - locationProduct
-      security:
-        - bearerAuth: []
-      summary: Delete location product
-      description: Deletes a location product from the system.
-      parameters:
-        - name: locationProductID
-          in: path
-          required: true
-          description: Unique identifier of the location product
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "204":
-          description: Location product item removed successfully
-        "400":
-          description: Invalid request
-        "404":
-          description: Location product item not found
         "401":
           description: Unauthenticated user
         "403":
@@ -5898,22 +5525,6 @@ components:
         - locationId
         - dayOfWeek
         - endTime
-    locationProduct:
-      type: object
-      properties:
-        productId:
-          type: string
-          format: uuid
-        productVariationId:
-          type: string
-          format: uuid
-        locationId:
-          type: string
-          format: uuid
-      required:
-        - productId
-        - productVariationId
-        - locationId
     product:
       type: object
       properties:
@@ -6327,6 +5938,42 @@ components:
       required:
         - businessCode
         - name
+    order:
+      type: object
+      properties:
+        price:
+          type: string
+        currency:
+          type: string
+          enum:
+            - Euro
+            - Dollar
+        orderStatus:
+          type: string
+          enum:
+            - Open
+            - Closed
+            - Cancelled
+            - Refunded
+        tip:
+          type: string
+        customerDiscountID:
+          type: string
+          format: uuid
+        userID:
+          type: string
+          format: uuid
+        locationBusinessID:
+          type: string
+          format: uuid
+      required:
+        - price
+        - currency
+        - orderStatus
+        - tip
+        - customerDiscountID
+        - userID
+        - locationBusinessID
   securitySchemes:
     bearerAuth:
       type: http
