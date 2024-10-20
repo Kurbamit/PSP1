@@ -6247,7 +6247,7 @@ paths:
           description: Method not supported
         "500":
           description: Internal server error
-          
+
   /UserType:
     post:
       tags:
@@ -6391,17 +6391,19 @@ paths:
           
 components:
   schemas:
+components:
+  schemas:
     workingHours:
       type: object
       properties:
         id:
           type: string
           format: uuid
-          description: "Primary key for the working hours entry"
+          description: Primary key for the working hours entry
         locationId:
           type: string
           format: uuid
-          description: "Foreign key for the location"
+          description: Foreign key for the location
         dayOfWeek:
           type: integer
           enum:
@@ -6412,11 +6414,11 @@ components:
             - Friday
             - Saturday
             - Sunday
-          description: "Day of the week"
+          description: Day of the week
         endTime:
           type: string
           format: time
-          description: "The end time for the working hours"
+          description: The end time for the working hours
       required:
         - id
         - locationId
@@ -6500,6 +6502,10 @@ components:
           type: string
           format: phone
           description: Customer phone number
+      required:
+        - name
+        - surname
+        - phoneNumber
     tax:
       type: object
       properties:
@@ -6510,6 +6516,9 @@ components:
         description:
           type: string
           description: Description of the tax
+      required:
+        - Tax
+        - description
     productTaxRow:
       type: object
       properties:
@@ -6521,6 +6530,9 @@ components:
           type: string
           format: uuid
           description: ID of the product
+      required:
+        - taxId
+        - productId
     serviceTaxRow:
       type: object
       properties:
@@ -6532,6 +6544,9 @@ components:
           type: string
           format: uuid
           description: ID of the service
+      required:
+        - taxId
+        - serviceId
     contactInfo:
       type: object
       properties:
@@ -6551,6 +6566,14 @@ components:
         email:
           type: string
           format: email
+      required:
+        - country
+        - city
+        - street
+        - number
+        - postcode
+        - phone
+        - email
     service:
       type: object
       properties:
@@ -6563,11 +6586,16 @@ components:
           description: Name of the service
         duration:
           type: integer
-          description: Duration of the service in minutes.
+          description: Duration of the service in minutes
         price:
           type: number
           format: double
-          description: Price of the service.
+          description: Price of the service
+      required:
+        - locationId
+        - name
+        - duration
+        - price
     locationBusiness:
       type: object
       properties:
@@ -6583,6 +6611,11 @@ components:
         businessID:
           type: string
           format: uuid
+      required:
+        - code
+        - name
+        - contactInfoID
+        - businessID
     productOrderRow:
       type: object
       properties:
@@ -6595,6 +6628,10 @@ components:
         customerDiscountID:
           type: string
           format: uuid
+      required:
+        - orderId
+        - productId
+        - customerDiscountID
     locationProductRow:
       type: object
       properties:
@@ -6607,6 +6644,10 @@ components:
         locationBusinessID:
           type: string
           format: uuid
+      required:
+        - productId
+        - productVariationID
+        - locationBusinessID
     employee:
       type: object
       properties:
@@ -6626,6 +6667,13 @@ components:
         locationBusinessID:
           type: string
           format: uuid
+      required:
+        - name
+        - surname
+        - salary
+        - userTypeID
+        - userID
+        - locationBusinessID
     AuditInfo:
       type: object
       properties:
@@ -6645,11 +6693,18 @@ components:
           type: string
           format: uuid
           description: ID of the employee who created the record
+      required:
+        - createdAt
+        - modifiedAt
+        - modifiedBy
+        - createdBy
     systemModule:
       type: object
       properties:
         endpoint:
           type: string
+      required:
+        - endpoint
     UserSystemModuleRow:
       type: object
       properties:
@@ -6659,6 +6714,9 @@ components:
         systemModuleId:
           type: string
           format: uuid
+      required:
+        - userTypeId
+        - systemModuleId
     UserType:
       type: object
       properties:
@@ -6667,7 +6725,10 @@ components:
         businessId:
           type: string
           format: uuid
-          
+      required:
+        - roleName
+        - businessId
+
   securitySchemes:
     bearerAuth:
       type: http
