@@ -48,6 +48,8 @@ tags:
     description: Operations related to Contact info
   - name: service
     description: Operations related to services
+  - name: locationBusiness
+    description: Operations related to location business
 
 paths:
   /auth/token:
@@ -5670,6 +5672,237 @@ paths:
           description: Method not supported
         "500":
           description: Internal server error
+          
+  /locationBusiness:
+    post:
+      tags:
+        - locationBusiness
+      security:
+        - bearerAuth: []
+      summary: Create a new location business entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/locationBusiness"
+      responses:
+        "201":
+          description: Location business created successfully
+        "400":
+          description: Invalid location business data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+    
+    get:
+      tags:
+        - locationBusiness
+      summary: Retrieve a list of location business entries
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Column to order results by
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: name
+          in: query
+          description: Filter locations by name
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: Filter locations by code
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of location business entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/locationBusiness"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when location business was first created
+                        modifiedAt:
+                          type: string
+                          format: date-time
+                          description: Date when location business was last modified
+                        modifiedBy:
+                          type: string
+                          format: uuid
+                          description: ID of the employee who last modified the location business
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+  /locationBusiness/{locationBusinessID}:
+    get:
+      tags:
+        - locationBusiness
+      summary: Retrieve a specific location business item by ID
+      description: Fetches details of a location business based on the provided locationBusinessID.
+      parameters:
+        - name: locationBusinessID
+          in: path
+          required: true
+          description: Unique identifier of the location business item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Location business item details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/locationBusiness"
+                  - type: object
+                    properties:
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date when the location business item was created
+                      modifiedAt:
+                        type: string
+                        format: date-time
+                        description: Date when the location business item was last modified
+                      modifiedBy:
+                        type: string
+                        format: uuid
+                        description: ID of the employee who last modified the location business
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+    put:
+      tags:
+        - locationBusiness
+      security:
+        - bearerAuth: []
+      summary: Update an existing location business
+      description: Updates the code or name of an existing location business.
+      parameters:
+        - name: locationBusinessID
+          in: path
+          description: Unique identifier of location business item
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  description: New location code
+                name:
+                  type: string
+                  description: New location name
+              anyOf:
+                - required:
+                  - code
+                - required:
+                  - name
+      responses:
+        "200":
+          description: Location business updated successfully
+        "400":
+          description: Invalid request or location business data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Location business not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+  
+    delete:
+      tags:
+        - locationBusiness
+      security:
+        - bearerAuth: []
+      summary: Delete an existing location business
+      description: Deletes a location business item from the system.
+      parameters:
+        - name: locationBusinessID
+          in: path
+          description: Unique identifier of the location business item
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Location business item deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Location business not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
 
 components:
   schemas:
@@ -5850,6 +6083,21 @@ components:
           type: number
           format: double
           description: Price of the service.
+    locationBusiness:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Location code
+        name:
+          type: string
+          description: Location name
+        contactInfoID:
+          type: string
+          format: uuid
+        businessID:
+          type: string
+          format: uuid
     
   securitySchemes:
     bearerAuth:
