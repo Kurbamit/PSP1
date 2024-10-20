@@ -152,7 +152,7 @@ paths:
                     type: object
                     properties:
                       paymentType:
-                        type: integer
+                        type: string
                         enum: [Cash, Card, GiftCard]
                         description: Payment method
                       paidAt:
@@ -243,7 +243,7 @@ paths:
                       type: string
                       description: Unique ID of the payment
                     paymentTypeEnum:
-                      type: integer
+                      type: string
                       description: Enum value from PaymentType
                     paidAt:
                       type: string
@@ -288,7 +288,7 @@ paths:
                     type: string
                     description: Unique ID of the payment
                   paymentTypeEnum:
-                    type: integer
+                    type: string
                     description: Enum value from PaymentType
                   paidAt:
                     type: string
@@ -2658,7 +2658,7 @@ paths:
                       format: double
                       description: Price of the order
                     OrderStatusEnum:
-                      type: integer
+                      type: string
                       enum: [Open, Closed, Cancelled, Refunded]
                       description: Order type enum from OrderStatusEnum
                     createdAt:
@@ -2765,7 +2765,7 @@ paths:
                     type: string
                     format: uuid
                   OrderStatusEnum:
-                    type: integer
+                    type: string
                     enum: [Open, Closed, Cancelled, Refunded]
                     description: Order type enum from OrderStatusEnum
                   orderItems:
@@ -6391,8 +6391,6 @@ paths:
           
 components:
   schemas:
-components:
-  schemas:
     workingHours:
       type: object
       properties:
@@ -6405,7 +6403,7 @@ components:
           format: uuid
           description: Foreign key for the location
         dayOfWeek:
-          type: integer
+          type: string
           enum:
             - Monday
             - Tuesday
