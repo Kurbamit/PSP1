@@ -52,6 +52,8 @@ tags:
     description: Operations related to location business
   - name: productOrderRow
     description: Operations related to product order row
+  - name: locationProductRow
+    description: Operations related to location product row
 
 paths:
   /auth/token:
@@ -6093,6 +6095,194 @@ paths:
           "500":
             description: Internal server error
 
+  /locationProductRow:
+    post:
+      tags:
+        - locationProductRow
+      security:
+        - bearerAuth: []
+      summary: Create a new location product row entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/locationProductRow"
+      responses:
+        "201":
+          description: Location product row created successfully
+        "400":
+          description: Invalid location product row data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+  
+    get:
+      tags:
+        - locationProductRow
+      summary: Retrieve a list of location product row entries
+      parameters:
+      - name: resultCount
+        in: query
+        description: Maximum number of items to return
+        required: true
+        schema:
+          type: integer
+      - name: pageIndex
+        in: query
+        description: Page index number
+        required: true
+        schema:
+          type: integer
+      - name: orderingColumn
+        in: query
+        description: Column to order results by
+        required: true
+        schema:
+          type: string
+      - name: orderingDirection
+        in: query
+        description: Ordering direction (0 - asc, 1 - desc)
+        required: true
+        schema:
+          type: integer
+      - name: productId
+        in: query
+        description: Filter by product ID
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: productVariationID
+        in: query
+        description: Filter by product variation ID
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: locationBusinessID
+        in: query
+        description: Filter by location business ID
+        required: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: A list of location product row entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/locationProductRow"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when the location product row was first created
+                        modifiedAt:
+                          type: string
+                          format: date-time
+                          description: Date when the location product row was last modified
+                        modifiedBy:
+                          type: string
+                          format: uuid
+                          description: ID of the employee who last modified the location product row
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+  /locationProductRow/{locationProductRowID}:
+    get:
+      tags:
+        - locationProductRow
+      summary: Retrieve a specific location product row by ID
+      description: Fetches details of a location product row based on the provided locationProductRowID.
+      parameters:
+        - name: locationProductRowID
+          in: path
+          required: true
+          description: Unique identifier of the location product row
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Location product row details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/locationProductRow"
+                  - type: object
+                    properties:
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date when the location product row was created
+                      modifiedAt:
+                        type: string
+                        format: date-time
+                        description: Date when the location product row was last modified
+                      modifiedBy:
+                        type: string
+                        format: uuid
+                        description: ID of the employee who last modified the location product row
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+    delete:
+      tags:
+        - locationProductRow
+      security:
+        - bearerAuth: []
+      summary: Delete an existing location product row
+      description: Deletes a location product row from the system.
+      parameters:
+        - name: locationProductRowID
+          in: path
+          description: Unique identifier of the location product row
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Location product row deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Location product row not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
 
 components:
   schemas:
@@ -6298,6 +6488,18 @@ components:
           type: string
           format: uuid
         customerDiscountID:
+          type: string
+          format: uuid
+    locationProductRow:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+        productVariationID:
+          type: string
+          format: uuid
+        locationBusinessID:
           type: string
           format: uuid
     
