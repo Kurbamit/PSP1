@@ -40,6 +40,10 @@ tags:
     description: Operations related to Location product
   - name: customer
     description: Operations related to Customers
+  - name: productTaxRow
+    description: Operations related to Product Tax Row
+  - name: serviceTaxRow
+    description: Operations related to Service Tax Row
 
 paths:
   /auth/token:
@@ -4230,13 +4234,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                Tax:
-                  type: integer
-                  description: Tax number
-              required:
-                - Tax
+              $ref: "#/components/schemas/tax"
       responses:
         "201":
           description: Tax item created successfully
@@ -4308,32 +4306,24 @@ paths:
             format: date-time
       responses:
         "200":
-          description: A list of axetrieved successfully
+          description: A list of taxes retrieved successfully
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    TaxId:
-                      type: string
-                      format: uuid
-                      description: Unique identifier of the tax item
-                    ProductId:
-                      type: array
-                      items:
-                        type: string
-                        format: uuid
-                        description: List of product IDS that this tax applies to
-                    createdAt:
-                      type: string
-                      format: date-time
-                      description: Date when the inventory item was created
-                    modifiedAt:
-                      type: string
-                      format: date-time
-                      description: Date when the inventory item was last modified
+                  allOf:
+                    - $ref: "#/components/schemas/tax"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when the tax item was created
+                        modifiedAt:
+                          type: string
+                          format: date-time
+                          description: Date when the tax item was last modified
         "400":
           description: Invalid request
         "401":
@@ -4365,29 +4355,18 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  TaxId:
-                    type: string
-                    format: uuid
-                    description: Unique identifier of the tax item
-                  Tax:
-                    type: integer
-                    description: Tax integer value
-                  ProductId:
-                    type: array
-                    items:
-                      type: string
-                      format: uuid
-                      description: Unique identifier of the product that this tax applies to
-                  createdAt:
-                    type: string
-                    format: date-time
-                    description: Date when the tax item was created
-                  modifiedAt:
-                    type: string
-                    format: date-time
-                    description: Date when the tax last modified
+                allOf:
+                  - $ref: "#/components/schemas/tax"
+                  - type: object
+                    properties:
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date when the tax item was created
+                      modifiedAt:
+                        type: string
+                        format: date-time
+                        description: Date when the tax item was last modified
         "400":
           description: Invalid request
         "401":
@@ -4420,17 +4399,11 @@ paths:
               type: object
               properties:
                 Tax:
-                  type: integer
-                  description: Tax integer value
-                ProductId:
-                  type: array
-                  items:
-                    type: string
-                    format: uuid
-                    description: Unique identifier of the product variation
+                  type: number
+                  format: float
+                  description: Tax value
               required:
                 - Tax
-                - ProductId
       responses:
         "200":
           description: Tax item updated successfully
@@ -4800,6 +4773,372 @@ paths:
           description: Method not supported
         "500":
           description: Internal server error
+  
+  /productTaxRow:
+    post:
+      tags:
+        - productTaxRow
+      security:
+        - bearerAuth: []
+      summary: Create a new product tax row
+      description: Creates a new product tax row entry into the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/productTaxRow"
+      responses:
+        "201":
+          description: Product tax row created successfully
+        "400":
+          description: Invalid product tax data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+          
+    get:
+      tags:
+        - productTaxRow
+      summary: Retrieve a list of product tax rows
+      description: Retrieves a list of product tax rows based on provided criteria.
+      parameters:
+      - name: resultCount
+        in: query
+        description: Maximum number of items to return
+        required: true
+        schema:
+          type: integer
+      - name: pageIndex
+        in: query
+        description: Page index number
+        required: true
+        schema:
+          type: integer
+      - name: orderingColumn
+        in: query
+        description: Column to order results by
+        required: true
+        schema:
+          type: string
+      - name: orderingDirection
+        in: query
+        description: Ordering direction (0 - asc, 1 - desc)
+        required: true
+        schema:
+          type: integer
+      - name: TaxID
+        in: query
+        description: Filter product tax rows by Tax ID
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: ProductID
+        in: query
+        description: Filter product tax rows by product ID
+        required: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: A list of product tax rows retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/productTaxRow"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when product tax row was first created
+                        modifiedAt:
+                          type: string
+                          format: date-time
+                          description: Date when product tax row was last modified
+                        modifiedBy:
+                          type: string
+                          format: uuid
+                          description: ID of the employee who last modified the product tax row
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+  /productTaxRow/{productTaxRowID}:
+    get:
+      tags:
+        - productTaxRow
+      summary: Retrieve a specific product tax row
+      description: Retrieves a product tax row by the specified product tax row iD.
+      parameters:
+        - name: productTaxRowID
+          in: path
+          required: true
+          description: Unique identifier of the product tax row
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Product tax row details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/productTaxRow"
+                  - type: object
+                    properties:
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date when the inventory item was created
+                      modifiedAt:
+                        type: string
+                        format: date-time
+                        description: Date when the inventory item was last modified
+                      modifiedBy:
+                        type: string
+                        format: uuid
+                        description: ID of the employee who last modified the product tax row
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - productTaxRow
+      security:
+        - bearerAuth: []
+      summary: Delete an existing product tax row
+      description: Deletes a product tax row from the system.
+      parameters:
+        - name: productTaxRowID
+          in: path
+          description: Unique identifier of the product tax row
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Product tax row deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Product tax row not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /serviceTaxRow:
+    post:
+      tags:
+        - serviceTaxRow
+      security:
+        - bearerAuth: []
+      summary: Create a new service tax row
+      description: Creates a new service tax row entry into the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/serviceTaxRow"
+      responses:
+        "201":
+          description: Service tax row created successfully
+        "400":
+          description: Invalid product tax data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+          
+    get:
+      tags:
+        - serviceTaxRow
+      summary: Retrieve a list of service tax rows
+      description: Retrieves a list of service tax rows based on provided criteria.
+      parameters:
+      - name: resultCount
+        in: query
+        description: Maximum number of items to return
+        required: true
+        schema:
+          type: integer
+      - name: pageIndex
+        in: query
+        description: Page index number
+        required: true
+        schema:
+          type: integer
+      - name: orderingColumn
+        in: query
+        description: Column to order results by
+        required: true
+        schema:
+          type: string
+      - name: orderingDirection
+        in: query
+        description: Ordering direction (0 - asc, 1 - desc)
+        required: true
+        schema:
+          type: integer
+      - name: TaxID
+        in: query
+        description: Filter service tax rows by Tax ID
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: ServiceID
+        in: query
+        description: Filter service tax rows by service ID
+        required: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: A list of service tax rows retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/serviceTaxRow"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when product tax row was first created
+                        modifiedAt:
+                          type: string
+                          format: date-time
+                          description: Date when product tax row was last modified
+                        modifiedBy:
+                          type: string
+                          format: uuid
+                          description: ID of the employee who last modified the product tax row
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+  /serviceTaxRow/{serviceTaxRowID}:
+    get:
+      tags:
+        - serviceTaxRow
+      summary: Retrieve a specific service tax row
+      description: Retrieves a service tax row by the specified product tax row iD.
+      parameters:
+        - name: serviceTaxRowID
+          in: path
+          required: true
+          description: Unique identifier of the service tax row
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Service tax row details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/serviceTaxRow"
+                  - type: object
+                    properties:
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date when the inventory item was created
+                      modifiedAt:
+                        type: string
+                        format: date-time
+                        description: Date when the inventory item was last modified
+                      modifiedBy:
+                        type: string
+                        format: uuid
+                        description: ID of the employee who last modified the service tax row
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - serviceTaxRow
+      security:
+        - bearerAuth: []
+      summary: Delete an existing service tax row
+      description: Deletes a service tax row from the system.
+      parameters:
+        - name: serviceTaxRowID
+          in: path
+          description: Unique identifier of the service tax row
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Service tax row deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Service tax row not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
 
 components:
   schemas:
@@ -4912,6 +5251,38 @@ components:
           type: string
           format: phone
           description: Customer phone number
+    tax:
+      type: object
+      properties:
+        Tax:
+          type: number
+          format: float
+          description: Tax amount
+        description:
+          type: string
+          description: Description of the tax
+    productTaxRow:
+      type: object
+      properties:
+        taxId:
+          type: string
+          format: uuid
+          description: ID of the tax
+        productId:
+          type: string
+          format: uuid
+          description: ID of the product
+    serviceTaxRow:
+      type: object
+      properties:
+        taxId:
+          type: string
+          format: uuid
+          description: ID of the tax
+        serviceId:
+          type: string
+          format: uuid
+          description: ID of the service
 
   securitySchemes:
     bearerAuth:
