@@ -58,6 +58,10 @@ tags:
     description: Operations related to Customer discounts
   - name: eventTime
     description: Operations related to event time
+  - name: workingHours
+    description:  Operations related to working hours
+  - name: orderServiceRow
+    description: Operations related to order service row
 
 paths:
   /auth/token:
@@ -5653,16 +5657,380 @@ paths:
         "500":
           description: Internal server error
 
-          
+  /workingHours:
+    post:
+      tags:
+        - workingHours
+      security:
+        - bearerAuth: []
+      summary: Create new working hours entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/workingHours"
+      responses:
+        "201":
+          description: Working hours created successfully
+        "400":
+          description: Invalid working hours data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+  
+    get:
+      tags:
+        - workingHours
+      summary: Retrieve a list of working hours entries
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Column to order results by
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: LocationID
+          in: query
+          description: Filter working hours by location
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: DayOfWeek
+          in: query
+          description: Filter working hours by day of the week
+          required: false
+          schema:
+            type: string
+            enum:
+              - Monday
+              - Tuesday
+              - Wednesday
+              - Thursday
+              - Friday
+              - Saturday
+              - Sunday
+      responses:
+        "200":
+          description: A list of working hours retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/workingHours"
+                    - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+  /workingHours/{workingHoursID}:
+    get:
+      tags:
+        - workingHours
+      summary: Retrieve a specific working hours entry by ID
+      description: Fetches details of working hours based on the provided ID.
+      parameters:
+        - name: workingHoursID
+          in: path
+          required: true
+          description: Unique identifier of the working hours entry
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Working hours details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/workingHours"
+                  - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+    put:
+      tags:
+        - workingHours
+      security:
+        - bearerAuth: []
+      summary: Update existing working hours
+      description: Updates the day of the week, start time, and end time of existing working hours
+      parameters:
+        - name: workingHoursID
+          in: path
+          description: Unique identifier of working hours entry.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dayOfWeek:
+                  type: string
+                  enum:
+                    - Monday
+                    - Tuesday
+                    - Wednesday
+                    - Thursday
+                    - Friday
+                    - Saturday
+                    - Sunday
+                  description: New day of the week
+                startTime:
+                  type: string
+                  description: New start time for the working hours
+                endTime:
+                  type: string
+                  description: New end time for the working hours
+              anyOf:
+                - required:
+                    - dayOfWeek
+                - required:
+                    - startTime
+                - required:
+                    - endTime
+      responses:
+        "200":
+          description: Working hours updated successfully
+        "400":
+          description: Invalid request or working hours data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Working hours info not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+  
+    delete:
+      tags:
+        - workingHours
+      security:
+        - bearerAuth: []
+      summary: Delete an existing working hours entry
+      description: Deletes a working hours entry from the system.
+      parameters:
+        - name: workingHoursID
+          in: path
+          description: Unique identifier of the working hours entry
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Working hours entry deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Working hours not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /orderServiceRow:
+    post:
+      tags:
+        - orderServiceRow
+      security:
+        - bearerAuth: []
+      summary: Create a new order service row entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/orderServiceRow"
+      responses:
+        "201":
+          description: Order service row created successfully
+        "400":
+          description: Invalid order service row data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+  
+    get:
+      tags:
+        - orderServiceRow
+      summary: Retrieve a list of order service rows
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderID
+          in: query
+          description: Filter order service rows by order ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: serviceID
+          in: query
+          description: Filter order service rows by service ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: A list of order service rows retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/orderServiceRow"
+                    - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+  
+  /orderServiceRow/{orderServiceRowID}:
+    get:
+      tags:
+        - orderServiceRow
+      summary: Retrieve a specific order service row by ID
+      description: Fetches details of an order service row based on the provided ID.
+      parameters:
+        - name: orderServiceRowID
+          in: path
+          required: true
+          description: Unique identifier of the order service row
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Order service row details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/orderServiceRow"
+                  - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - orderServiceRow
+      security:
+        - bearerAuth: []
+      summary: Delete an existing order service row
+      description: Deletes an order service row from the system.
+      parameters:
+        - name: orderServiceRowID
+          in: path
+          description: Unique identifier of the order service row
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Order service row deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Order service row not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
 components:
   schemas:
     workingHours:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          description: Primary key for the working hours entry
         locationId:
           type: string
           format: uuid
@@ -5678,12 +6046,13 @@ components:
             - Saturday
             - Sunday
           description: Day of the week
+        startTime:
+          type: string
+          description: The end time for the working hours
         endTime:
           type: string
-          format: time
           description: The end time for the working hours
       required:
-        - id
         - locationId
         - dayOfWeek
         - endTime
@@ -6146,6 +6515,18 @@ components:
       required:
         - validFrom
         - validTo
+    orderServiceRow:
+      type: object
+      properties:
+        orderID:
+          type: string
+          format: uuid
+        serviceID:
+          type: string
+          format: uuid
+      required:
+        - orderID
+        - serviceID
   securitySchemes:
     bearerAuth:
       type: http
