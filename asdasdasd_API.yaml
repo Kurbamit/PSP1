@@ -131,214 +131,184 @@ paths:
         "500":
           description: Internal server error
 
-  /payments:
-    post:
-      tags:
-        - payment
-      summary: Process a payment for an order
-      description: Processes a payment for an open order.
-      requestBody:
-        required: true
-        content:
-          application/json:
+  /payment:
+      post:
+        tags:
+          - payment
+        security:
+          - bearerAuth: []
+        summary: Create a new payment entry
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/payment"
+        responses:
+          "201":
+            description: Payment created successfully
+          "400":
+            description: Invalid payment data
+          "405":
+            description: Method not supported
+          "422":
+            description: Invalid data
+          "500":
+            description: Internal server error
+      
+      get:
+        tags:
+          - payment
+        summary: Retrieve a list of payment entries
+        parameters:
+          - name: resultCount
+            in: query
+            description: Maximum number of items to return
+            required: true
             schema:
-              type: object
-              properties:
-                orderId:
-                  type: string
-                  description: ID of the order being paid
-                payments:
+              type: integer
+          - name: pageIndex
+            in: query
+            description: Page index number
+            required: true
+            schema:
+              type: integer
+          - name: orderingColumn
+            in: query
+            description: Column to order results by
+            required: true
+            schema:
+              type: string
+          - name: orderingDirection
+            in: query
+            description: Ordering direction (0 - asc, 1 - desc)
+            required: true
+            schema:
+              type: integer
+          - name: paymentType
+            in: query
+            description: Filter payments by type (Cash, Card, GiftCard)
+            required: false
+            schema:
+              type: string
+          - name: state
+            in: query
+            description: Filter payments by state (Completed, Cancelled, Failed, Open)
+            required: false
+            schema:
+              type: string
+        responses:
+          "200":
+            description: A list of payment info retrieved successfully
+            content:
+              application/json:
+                schema:
                   type: array
-                  description: List of payments (split payments allowed)
                   items:
-                    type: object
-                    properties:
-                      paymentType:
-                        type: string
-                        enum: [Cash, Card, GiftCard]
-                        description: Payment method
-                      paidAt:
-                        type: string
-                        format: date-time
-                        description: Amount paid
-              required:
-                - orderId
-                - payments
-      responses:
-        "200":
-          description: Payment processed successfully
+                    allOf:
+                      - $ref: "#/components/schemas/payment"
+                      - $ref: "#/components/schemas/AuditInfo"
+          "400":
+            description: Invalid request
+          "401":
+            description: Unauthenticated user
+          "403":
+            description: No permission
+          "405":
+            description: Method not supported
+          "500":
+            description: Internal server error
+  
+  /payment/{paymentId}:
+      get:
+        tags:
+          - payment
+        summary: Retrieve a specific payment item by ID
+        description: Fetches details of a payment item based on the provided payment ID.
+        parameters:
+          - name: paymentId
+            in: path
+            required: true
+            description: Unique identifier of the payment item
+            schema:
+              type: string
+              format: uuid
+        responses:
+          "200":
+            description: Payment item details retrieved successfully
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: "#/components/schemas/payment"
+                    - $ref: "#/components/schemas/AuditInfo"
+          "400":
+            description: Invalid request
+          "401":
+            description: Unauthenticated user
+          "403":
+            description: No permission
+          "405":
+            description: Method not supported
+          "500":
+            description: Internal server error
+            
+      put:
+        tags:
+          - payment
+        security:
+          - bearerAuth: []
+        summary: Update an existing payment
+        description: Updates the paymentSize or state of an existing payment
+        parameters:
+          - name: paymentId
+            in: path
+            description: Unique identifier of payment item
+            required: true
+            schema:
+              type: string
+              format: uuid
+        requestBody:
+          required: true
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  paymentId:
+                  paymentSize:
+                    type: number
+                    format: double
+                    description: Updated payment size
+                  state:
                     type: string
-        "400":
-          description: Invalid payment details or order status not open
-        "500":
-          description: Internal server error
-
-    get:
-      tags:
-        - payment
-      summary: Retrieve a list of payments
-      description: Fetches a list of payments.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: resultCount
-          in: query
-          description: Maximum length of returned list
-          required: true
-          schema:
-            type: integer
-        - name: pageIndex
-          in: query
-          description: Page index number
-          required: true
-          schema:
-            type: integer
-        - name: orderingColumn
-          in: query
-          description: Ordering column name
-          required: true
-          schema:
-            type: string
-        - name: orderingDirection
-          in: query
-          description: Ordering direction (0 - asc, 1 - desc)
-          required: true
-          schema:
-            type: integer
-        - name: paymentType
-          in: query
-          description: Filter payments based on their type
-          required: false
-          schema:
-            type: integer
-        - name: startPaidAt
-          in: query
-          description: Filter payments made on or after this starting date and time
-          required: false
-          schema:
-            type: string
-            format: date
-        - name: endPaidAt
-          in: query
-          description: Filter payments made on or before this ending date and time
-          required: false
-          schema:
-            type: string
-            format: date
-      responses:
-        "200":
-          description: A list of payments retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      description: Unique ID of the payment
-                    paymentTypeEnum:
-                      type: string
-                      description: Enum value from PaymentType
-                    paidAt:
-                      type: string
-                      format: date
-                      description: Date and time the payment was made on
-        "400":
-          description: Invalid request
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission (Only admin and Manager)
-        "405":
-          description: Method not supported
-        "500":
-          description: Internal server error
-
-  /payments/{paymentId}:
-    get:
-      tags:
-        - payment
-      summary: Retrieve a single payment by ID
-      description: Fetches a payment's details based on the provided payment ID.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: paymentId
-          in: path # <--- This was missing
-          required: true
-          description: Unique identifier of the payment
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: Payment details retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    description: Unique ID of the payment
-                  paymentTypeEnum:
-                    type: string
-                    description: Enum value from PaymentType
-                  paidAt:
-                    type: string
-                    format: date
-                    description: Date and time the payment was made on
-        "400":
-          description: Invalid request
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission (Only admin and Manager)
-        "405":
-          description: Method not supported
-        "500":
-          description: Internal server error
-
-    put:
-      tags:
-        - payment
-      summary: Refund a payment
-      description: Processes a refund for a specified payment by removing the payment record and puts old data into PaymentAudit table with DB triggers. **Only admin users** are allowed to refund payments.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: paymentId
-          in: path
-          required: true
-          description: Unique identifier of the payment
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: Payment refunded successfully
-        "400":
-          description: Invalid paymentId
-        "401":
-          description: Unauthenticated user
-        "403":
-          description: No permission
-        "404":
-          description: Original payment not found
-        "405":
-          description: Method not supported
-        "422":
-          description: Invalid data
-        "500":
-          description: Internal server error
+                    enum:
+                      - Completed
+                      - Cancelled
+                      - Failed
+                      - Open
+                    description: Updated state of the payment
+                anyOf:
+                  - required:
+                      - paymentSize
+                  - required:
+                      - state
+        responses:
+          "200":
+            description: Payment updated successfully
+          "400":
+            description: Invalid request or Payment data
+          "401":
+            description: Unauthenticated user
+          "403":
+            description: No permission
+          "404":
+            description: Payment info not found
+          "405":
+            description: Method not supported
+          "422":
+            description: Invalid data
+          "500":
+            description: Internal server error
 
   /discount:
     post:
@@ -476,7 +446,7 @@ paths:
       security:
         - bearerAuth: []
       summary: Update an existing discount
-      description: Updates only the type, value, currency, validFrom and validTo of an existing discount.
+      description: Updates only the type, value, validFrom and validTo of an existing discount.
       parameters:
         - name: discountID
           in: path
@@ -502,9 +472,6 @@ paths:
                   type: number
                   format: double
                   description: New discount value
-                currency:
-                  type: string
-                  description: New currency
                 validFrom:
                   type: string
                   format: date-time
@@ -518,8 +485,6 @@ paths:
                   - type
                 - required:
                   - value
-                - required:
-                  - currency
                 - required:
                   - validFrom
                 - required:
@@ -6808,6 +6773,9 @@ components:
           format: double
         currency:
           type: string
+          enum:
+            - Euro
+            - Dollar
         validFrom:
           type: string
           format: date-time
@@ -6824,6 +6792,43 @@ components:
         - validFrom
         - validTo
         - locationBusinessID
+    payment:
+      type: object
+      properties:
+        paymentType:
+          type: string
+          enum:
+            - Cash
+            - Card
+            - GiftCard
+        transactionID:
+          type: string
+          format: uuid
+        paymentSize:
+          type: number
+          format: double
+        currency:
+          type: string
+          enum:
+            - Euro
+            - Dollar
+        state:
+          type: string
+          enum:
+            - Completed
+            - Cancelled
+            - Failed
+            - Open
+        paidAt:
+          type: string
+          format: date-time
+      required:
+        - paymentType
+        - transactionID
+        - paymentSize
+        - currency
+        - state
+        - paidAt
 
   securitySchemes:
     bearerAuth:
