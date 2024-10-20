@@ -46,6 +46,8 @@ tags:
     description: Operations related to Service Tax Row
   - name: contactInfo
     description: Operations related to Contact info
+  - name: service
+    description: Operations related to services
 
 paths:
   /auth/token:
@@ -5315,7 +5317,7 @@ paths:
         - contactInfo
       security:
         - bearerAuth: []
-      summary: Update an existing customer
+      summary: Update an existing contact info
       description: Updates the country, city, street, number, postcode, phone or email of a contact info item.
       parameters:
         - name: contactInfoID
@@ -5414,6 +5416,256 @@ paths:
           description: No permission
         "404":
           description: Contact info not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+          
+  /service:
+    post:
+      tags:
+        - service
+      security:
+        - bearerAuth: []
+      summary: Create a new service entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/service"
+      responses:
+        "201":
+          description: Service created successfully
+        "400":
+          description: Invalid service data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+    
+    get:
+      tags:
+        - service
+      summary: Retrieve a list of service entries
+      parameters:
+      - name: resultCount
+        in: query
+        description: Maximum number of items to return
+        required: true
+        schema:
+          type: integer
+      - name: pageIndex
+        in: query
+        description: Page index number
+        required: true
+        schema:
+          type: integer
+      - name: orderingColumn
+        in: query
+        description: Column to order results by
+        required: true
+        schema:
+          type: string
+      - name: orderingDirection
+        in: query
+        description: Ordering direction (0 - asc, 1 - desc)
+        required: true
+        schema:
+          type: integer
+      - name: LocationID
+        in: query
+        description: Filter services by location
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: Name
+        in: query
+        description: Filter services by name
+        required: false
+        schema:
+          type: string
+      - name: Duration
+        in: query
+        description: Filter services by duration (in minutes)
+        required: false
+        schema:
+          type: integer
+      - name: Price
+        in: query
+        description: Filter services by price
+        required: false
+        schema:
+          type: number
+          format: double
+      responses:
+        "200":
+          description: A list of contact info retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/service"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when service was first created
+                        modifiedAt:
+                          type: string
+                          format: date-time
+                          description: Date when service was last modified
+                        modifiedBy:
+                          type: string
+                          format: uuid
+                          description: ID of the employee who last modified the service
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /service/{serviceID}:
+    get:
+      tags:
+        - service
+      summary: Retrieve a specific service item by ID
+      description: Fetches details of a service item based on the provided service ID.
+      parameters:
+        - name: serviceID
+          in: path
+          required: true
+          description: Unique identifier of the service item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Service item details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/service"
+                  - type: object
+                    properties:
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date when the service item was created
+                      modifiedAt:
+                        type: string
+                        format: date-time
+                        description: Date when the service item was last modified
+                      modifiedBy:
+                        type: string
+                        format: uuid
+                        description: ID of the employee who last modified the service
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+          
+    put:
+      tags:
+        - service
+      security:
+        - bearerAuth: []
+      summary: Update an existing service
+      description: Updates the name, duration or price of an existing service
+      parameters:
+        - name: serviceID
+          in: path
+          description: Unique identifier of service item.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Name:
+                  type: string
+                  description: New name
+                Duration:
+                  type: integer
+                  description: New duration (in minutes)
+                Price:
+                  type: number
+                  format: double
+                  description: New price of the service
+              anyOf:
+                - required:
+                  - Name
+                - required:
+                  - Duration
+                - required:
+                  - Street
+      responses:
+        "200":
+          description: Service updated successfully
+        "400":
+          description: Invalid request or Service data
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Service info not found
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+          
+    delete:
+      tags:
+        - service
+      security:
+        - bearerAuth: []
+      summary: Delete an existing service item
+      description: Deletes a service item from the system.
+      parameters:
+        - name: serviceID
+          in: path
+          description: Unique identifier of the service item
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Service item deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: Service not found
         "405":
           description: Method not supported
         "500":
@@ -5581,7 +5833,23 @@ components:
         email:
           type: string
           format: email
-        
+    service:
+      type: object
+      properties:
+        locationId:
+          type: string
+          format: uuid
+          description: Location ID of where the service is offered
+        name:
+          type: string
+          description: Name of the service
+        duration:
+          type: integer
+          description: Duration of the service in minutes.
+        price:
+          type: number
+          format: double
+          description: Price of the service.
     
   securitySchemes:
     bearerAuth:
