@@ -50,6 +50,8 @@ tags:
     description: Operations related to services
   - name: locationBusiness
     description: Operations related to location business
+  - name: productOrderRow
+    description: Operations related to product order row
 
 paths:
   /auth/token:
@@ -5903,6 +5905,194 @@ paths:
         "500":
           description: Internal server error
 
+  /productOrderRow:
+      post:
+        tags:
+          - productOrderRow
+        security:
+          - bearerAuth: []
+        summary: Create a new product order row
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/productOrderRow"
+        responses:
+          "201":
+            description: Product order row created successfully
+          "400":
+            description: Invalid product order row data
+          "405":
+            description: Method not supported
+          "422":
+            description: Invalid data
+          "500":
+            description: Internal server error
+      
+      get:
+        tags:
+          - productOrderRow
+        summary: Retrieve a list of product order rows
+        parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Column to order results by
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: orderId
+          in: query
+          description: Filter product order rows by order ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: productId
+          in: query
+          description: Filter product order rows by product ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: customerDiscountID
+          in: query
+          description: Filter product order rows by customer discount ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        responses:
+          "200":
+            description: A list of product order rows retrieved successfully
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    allOf:
+                      - $ref: "#/components/schemas/productOrderRow"
+                      - type: object
+                        properties:
+                          createdAt:
+                            type: string
+                            format: date-time
+                            description: Date when the product order row was created
+                          modifiedAt:
+                            type: string
+                            format: date-time
+                            description: Date when the product order row was last modified
+                          modifiedBy:
+                            type: string
+                            format: uuid
+                            description: ID of the employee who last modified the product order row
+          "400":
+            description: Invalid request
+          "401":
+            description: Unauthenticated user
+          "403":
+            description: No permission
+          "405":
+            description: Method not supported
+          "500":
+            description: Internal server error
+  
+  /productOrderRow/{productOrderRowID}:
+      get:
+        tags:
+          - productOrderRow
+        summary: Retrieve a specific product order row by ID
+        description: Fetches details of a product order row based on the provided ID.
+        parameters:
+          - name: productOrderRowID
+            in: path
+            required: true
+            description: Unique identifier of the product order row
+            schema:
+              type: string
+              format: uuid
+        responses:
+          "200":
+            description: Product order row details retrieved successfully
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: "#/components/schemas/productOrderRow"
+                    - type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Date when the product order row was created
+                        modifiedAt:
+                          type: string
+                          format: date-time
+                          description: Date when the product order row was last modified
+                        modifiedBy:
+                          type: string
+                          format: uuid
+                          description: ID of the employee who last modified the product order row
+          "400":
+            description: Invalid request
+          "401":
+            description: Unauthenticated user
+          "403":
+            description: No permission
+          "405":
+            description: Method not supported
+          "500":
+            description: Internal server error
+  
+      delete:
+        tags:
+          - productOrderRow
+        security:
+          - bearerAuth: []
+        summary: Delete an existing product order row
+        description: Deletes a product order row from the system.
+        parameters:
+          - name: productOrderRowID
+            in: path
+            description: Unique identifier of the product order row
+            required: true
+            schema:
+              type: string
+              format: uuid
+        responses:
+          "204":
+            description: Product order row deleted successfully
+          "400":
+            description: Invalid request
+          "401":
+            description: Unauthenticated user
+          "403":
+            description: No permission
+          "404":
+            description: Product order row not found
+          "405":
+            description: Method not supported
+          "500":
+            description: Internal server error
+
 
 components:
   schemas:
@@ -6096,6 +6286,18 @@ components:
           type: string
           format: uuid
         businessID:
+          type: string
+          format: uuid
+    productOrderRow:
+      type: object
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        customerDiscountID:
           type: string
           format: uuid
     
