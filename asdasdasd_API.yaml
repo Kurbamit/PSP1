@@ -54,6 +54,10 @@ tags:
     description: Operations related to product order row
   - name: locationProductRow
     description: Operations related to location product row
+  - name: systemModule
+    description: Operations related to system module
+  - name: userSystemModuleRow
+    description: Operations related to User SystemModule row
 
 paths:
   /auth/token:
@@ -5948,7 +5952,443 @@ paths:
         "500":
           description: Internal server error
 
+  /systemModule:
+    post:
+      tags:
+        - systemModule
+      security:
+        - bearerAuth: []
+      summary: Create a new system module entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/systemModule"
+      responses:
+        "201":
+          description: System module created successfully
+        "400":
+          description: Invalid system module data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
 
+    get:
+      tags:
+        - systemModule
+      summary: Retrieve a list of system module entries
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Column to order results by
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of system module entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/systemModule"
+                    - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /systemModule/{systemModuleID}:
+    get:
+      tags:
+        - systemModule
+      summary: Retrieve a specific system module by ID
+      description: Fetches details of a system module based on the provided systemModuleID.
+      parameters:
+        - name: systemModuleID
+          in: path
+          required: true
+          description: Unique identifier of the system module
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: System module details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/systemModule"
+                  - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - systemModule
+      security:
+        - bearerAuth: []
+      summary: Delete an existing system module
+      description: Deletes a system module from the system.
+      parameters:
+        - name: systemModuleID
+          in: path
+          description: Unique identifier of the system module
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: System module deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: System module not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /UserSystemModuleRow:
+    post:
+      tags:
+        - userSystemModuleRow
+      security:
+        - bearerAuth: []
+      summary: Create a new user system module row entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserSystemModuleRow"
+      responses:
+        "201":
+          description: User system module row created successfully
+        "400":
+          description: Invalid user system module row data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+
+    get:
+      tags:
+        - userSystemModuleRow
+      summary: Retrieve a list of user system module row entries
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Column to order results by
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+        - name: userTypeId
+          in: query
+          description: Filter by user type ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: systemModuleId
+          in: query
+          description: Filter by system module ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: A list of user system module row entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/UserSystemModuleRow"
+                    - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /UserSystemModuleRow/{userSystemModuleRowID}:
+    get:
+      tags:
+        - userSystemModuleRow
+      summary: Retrieve a specific user system module row by ID
+      description: Fetches details of a user system module row based on the provided userSystemModuleRowID.
+      parameters:
+        - name: userSystemModuleRowID
+          in: path
+          required: true
+          description: Unique identifier of the user system module row
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: User system module row details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/UserSystemModuleRow"
+                  - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - userSystemModuleRow
+      security:
+        - bearerAuth: []
+      summary: Delete an existing user system module row
+      description: Deletes a user system module row from the system.
+      parameters:
+        - name: userSystemModuleRowID
+          in: path
+          description: Unique identifier of the user system module row
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: User system module row deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: User system module row not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+          
+  /UserType:
+    post:
+      tags:
+        - UserType
+      security:
+        - bearerAuth: []
+      summary: Create a new user type entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserType"
+      responses:
+        "201":
+          description: User type created successfully
+        "400":
+          description: Invalid user type data
+        "405":
+          description: Method not supported
+        "422":
+          description: Invalid data
+        "500":
+          description: Internal server error
+
+    get:
+      tags:
+        - UserType
+      summary: Retrieve a list of user type entries
+      parameters:
+        - name: resultCount
+          in: query
+          description: Maximum number of items to return
+          required: true
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Page index number
+          required: true
+          schema:
+            type: integer
+        - name: orderingColumn
+          in: query
+          description: Column to order results by
+          required: true
+          schema:
+            type: string
+        - name: orderingDirection
+          in: query
+          description: Ordering direction (0 - asc, 1 - desc)
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of user type entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/UserType"
+                    - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+  /UserType/{userTypeID}:
+    get:
+      tags:
+        - UserType
+      summary: Retrieve a specific user type by ID
+      description: Fetches details of a user type based on the provided userTypeID.
+      parameters:
+        - name: userTypeID
+          in: path
+          required: true
+          description: Unique identifier of the user type
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: User type details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/UserType"
+                  - $ref: "#/components/schemas/AuditInfo"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - UserType
+      security:
+        - bearerAuth: []
+      summary: Delete an existing user type
+      description: Deletes a user type from the system.
+      parameters:
+        - name: userTypeID
+          in: path
+          description: Unique identifier of the user type
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: User type deleted successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthenticated user
+        "403":
+          description: No permission
+        "404":
+          description: User type not found
+        "405":
+          description: Method not supported
+        "500":
+          description: Internal server error
+          
 components:
   schemas:
     workingHours:
@@ -6205,7 +6645,29 @@ components:
           type: string
           format: uuid
           description: ID of the employee who created the record
-    
+    systemModule:
+      type: object
+      properties:
+        endpoint:
+          type: string
+    UserSystemModuleRow:
+      type: object
+      properties:
+        userTypeId:
+          type: string
+          format: uuid
+        systemModuleId:
+          type: string
+          format: uuid
+    UserType:
+      type: object
+      properties:
+        roleName:
+          type: string
+        businessId:
+          type: string
+          format: uuid
+          
   securitySchemes:
     bearerAuth:
       type: http
